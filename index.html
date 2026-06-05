@@ -2356,9 +2356,10 @@ function sTogGrp(g){
   document.getElementById('s-rstBtn').classList.toggle('hot',sState.month>0||!!sState.grp);
   sUpdAll();
 }
-function sSetCust(cc){sState.cust=sState.cust===cc?null:cc;sState.prod=null;sUpdAll();}
+function sSetCust(cc){var c=String(cc);sState.cust=sState.cust===c?null:c;sState.prod=null;sUpdAll();}
 function sSetProd(code){
   if(code==='_null_')code=null;
+  else code=String(code);
   sState.prod=sState.prod===code?null:code;
   if(sState.prod){var p=S_PRODUCTS.find(function(x){return x.code===sState.prod;});if(p){sState.grp=p.grp;document.querySelectorAll('#s-fs .gp').forEach(function(el){var eg=el.classList.contains('gp-cl')?'CL':el.classList.contains('gp-sl2')?'SL-2.x':'SL-3.x';el.classList.toggle('active',eg===sState.grp);});}}
   sUpdAll();
@@ -2513,19 +2514,31 @@ function sBuildConcDonut(){
 
 function sUpdConcDonut(m){
   if(!sCharts.concDonut)return;
-  var d=S_CONC_MONTHLY[m]||S_CONC_MONTHLY[0];
-  var rest=Math.max(0,d.total-d.top2.reduce(function(s,x){return s+x.net;},0));
-  var vals=d.top2.map(function(x){return x.net;}).concat([rest]);
+  // คำนวณจาก live data
+  var mmKey=m?('2026-'+(m<10?'0':'')+m):null;
+  var custNets=[];
+  S_CUSTOMERS.forEach(function(c){
+    var v=mmKey?(c.monthly?c.monthly[mmKey]||0:0):c.net_all;
+    if(v>0) custNets.push({name:c.name,net:v});
+  });
+  custNets.sort(function(a,b){return b.net-a.net;});
+  var totalV=custNets.reduce(function(s,x){return s+x.net;},0)||1;
+  var top2=custNets.slice(0,2);
+  var top2Net=top2.reduce(function(s,x){return s+x.net;},0);
+  var rest=Math.max(0,totalV-top2Net);
+  var pct=Math.round(top2Net/totalV*100);
   var cols=['#1a56db','#ea580c','#e4e7ed'];
+  var vals=top2.map(function(x){return x.net;}).concat([rest]);
   sCharts.concDonut.data.datasets[0].data=vals;
   sCharts.concDonut.update('none');
-  document.getElementById('s-concPct').textContent=d.pct+'%';
-  document.getElementById('s-riskNeedle').style.left=Math.min(d.pct,98)+'%';
+  document.getElementById('s-concPct').textContent=pct+'%';
+  document.getElementById('s-riskNeedle').style.left=Math.min(pct,98)+'%';
   var html='';
-  d.top2.forEach(function(x,i){
-    html+='<div style="color:'+cols[i]+';font-size:9px;">● '+x.name+': '+x.net.toFixed(1)+'M฿ ('+x.pct+'%)</div>';
+  top2.forEach(function(x,i){
+    var p=Math.round(x.net/totalV*100);
+    html+='<div style="color:'+cols[i]+';font-size:9px;">● '+x.name.substring(0,12)+'...: '+x.net.toFixed(1)+'M ('+p+'%)</div>';
   });
-  html+='<div style="color:#94a3b8;font-size:9px;">● อื่นๆ: '+rest.toFixed(1)+'M฿</div>';
+  html+='<div style="color:#94a3b8;font-size:9px;">● อื่นๆ: '+rest.toFixed(1)+'M</div>';
   document.getElementById('s-concNames').innerHTML=html;
 }
 
@@ -2617,6 +2630,17 @@ function sUpdProds(){
   var grpF=sState.grp,prodF=sState.prod,custF=sState.cust,m=sState.month;
   var prods=S_PRODUCTS.slice();
   if(grpF)prods=prods.filter(function(p){return p.grp===grpF;});
+  // filter by customer — หา products ที่ลูกค้านั้นซื้อจาก monthly_obj
+  if(custF){
+    var cust=S_CUSTOMERS.find(function(x){return String(x.cc)===String(custF);});
+    if(cust){
+      var custCodes={};
+      // รวม product codes จาก monthly ทั้งหมดที่ลูกค้านี้ซื้อ
+      // ใช้ grp_mix_all เพื่อกรอง grp แทน
+      var custGrps=Object.keys(cust.grp_mix_all||{});
+      if(custGrps.length>0) prods=prods.filter(function(p){return custGrps.indexOf(p.grp)>=0;});
+    }
+  }
   prods.sort(function(a,b){
     var av=m?(a.monthly[m]||0):a.net_all;
     var bv=m?(b.monthly[m]||0):b.net_all;
