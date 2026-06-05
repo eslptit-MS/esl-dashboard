@@ -2237,6 +2237,7 @@ function sLoadData(year, callback) {
           grp_mix_all: c.grp_mix_all||{},
           grp_mix_m:   {},
           monthly:     mArr,
+          prod_months: c.prod_months||{},
           products:    []
         };
       });
@@ -2630,15 +2631,32 @@ function sUpdProds(){
   var grpF=sState.grp,prodF=sState.prod,custF=sState.cust,m=sState.month;
   var prods=S_PRODUCTS.slice();
   if(grpF)prods=prods.filter(function(p){return p.grp===grpF;});
-  // filter by customer — หา products ที่ลูกค้านั้นซื้อจาก monthly_obj
+  // filter by actual products customer bought
   if(custF){
     var cust=S_CUSTOMERS.find(function(x){return String(x.cc)===String(custF);});
     if(cust){
+      // รวม product codes ที่ลูกค้านี้ซื้อจาก prod_months
       var custCodes={};
-      // รวม product codes จาก monthly ทั้งหมดที่ลูกค้านี้ซื้อ
-      // ใช้ grp_mix_all เพื่อกรอง grp แทน
-      var custGrps=Object.keys(cust.grp_mix_all||{});
-      if(custGrps.length>0) prods=prods.filter(function(p){return custGrps.indexOf(p.grp)>=0;});
+      var pm=cust.prod_months||{};
+      if(m){
+        // เดือนที่เลือก
+        var mmKeyC='2026-'+(m<10?'0':'')+m;
+        var mProds=pm[mmKeyC]||{};
+        Object.keys(mProds).forEach(function(code){custCodes[code]=true;});
+      } else {
+        // ทุกเดือน
+        Object.keys(pm).forEach(function(mk){
+          Object.keys(pm[mk]).forEach(function(code){custCodes[code]=true;});
+        });
+      }
+      var codes=Object.keys(custCodes);
+      if(codes.length>0){
+        prods=prods.filter(function(p){return custCodes[p.code];});
+      } else {
+        // fallback: filter by grp
+        var custGrps=Object.keys(cust.grp_mix_all||{});
+        if(custGrps.length>0) prods=prods.filter(function(p){return custGrps.indexOf(p.grp)>=0;});
+      }
     }
   }
   prods.sort(function(a,b){
