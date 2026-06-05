@@ -2677,11 +2677,20 @@ function sBuildFurnBar(){
 }
 
 function sBuildOD(){
+  // Zone D: แสดง top customers จากข้อมูลจริง
   var html='';
-  S_OVERDUE.forEach(function(r){
-    html+='<tr><td>'+r.name+'</td><td><span class="od-badge '+(r.cat==='overdue'?'od-o':'od-7')+'">'+(r.cat==='overdue'?'เกินกำหนด':'ครบ 7 วัน')+'</span></td><td class="r">฿'+sFmtM(r.net)+'M</td><td class="r">'+r.inv+'</td></tr>';
+  S_CUSTOMERS.slice(0,8).forEach(function(c){
+    var domGrp=Object.keys(c.grp_mix_all).sort(function(a,b){return c.grp_mix_all[b]-c.grp_mix_all[a];})[0]||'SL-2.x';
+    var bgCol={'CL':'#fff3ec','SL-2.x':'#eff3ff','SL-3.x':'#f0fdf4'}[domGrp]||'#f1f5f9';
+    var fgCol={'CL':'#ea580c','SL-2.x':'#1a56db','SL-3.x':'#0d7a4a'}[domGrp]||'#94a3b8';
+    html+='<tr><td style="color:var(--text2);">'+c.name+'</td>';
+    html+='<td><span style="font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;background:'+bgCol+';color:'+fgCol+';">'+domGrp+'</span></td>';
+    html+='<td class="r" style="font-family:'IBM Plex Mono',monospace;font-weight:600;">฿'+sFmtM(c.net_all)+'M</td>';
+    html+='<td class="r" style="color:var(--text3);">'+sFmtN(Math.round(c.qty_ton||0))+' ตัน</td></tr>';
   });
-  document.getElementById('s-odBody').innerHTML=html;
+  document.getElementById('s-odBody').innerHTML=html||'<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">ไม่มีข้อมูล</td></tr>';
+  var hdr=document.querySelector('.od-table thead tr');
+  if(hdr) hdr.innerHTML='<th>ลูกค้า</th><th>กลุ่ม</th><th class="r">ยอดขายรวม</th><th class="r">ปริมาณ</th>';
 }
 
 function sUpdTypeRevLine(){
@@ -2715,22 +2724,21 @@ function sUpdTypeRevLine(){
 
 function sUpdProdShare(){
   var m=sState.month;
-  var items;
+  var items=[];
+  var mmKey=m?('2026-'+(m<10?'0':'')+m):null;
   if(m){
-    // รวมจาก S_TYPE_REVENUE.monthly ตามเดือน
-    var mData=S_TYPE_REVENUE.monthly[m]||{};
-    var arr=[];
-    Object.keys(mData).forEach(function(code){
-      if(mData[code]>0) arr.push({code:code,net:mData[code]});
+    S_PRODUCTS.forEach(function(p){
+      var v=mmKey&&p.monthly_obj?p.monthly_obj[mmKey]||0:0;
+      if(v>0) items.push({code:p.code,net:v,grp:p.grp});
     });
-    arr.sort(function(a,b){return b.net-a.net;});
-    var tot=arr.reduce(function(s,x){return s+x.net;},0)||1;
-    arr.forEach(function(x){x.pct=Math.round(x.net/tot*100);});
-    items=arr.slice(0,6);
+    items.sort(function(a,b){return b.net-a.net;});
+    var tot=items.reduce(function(s,x){return s+x.net;},0)||1;
+    items.forEach(function(x){x.pct=Math.round(x.net/tot*100);});
+    items=items.slice(0,6);
   } else {
     items=S_PROD_SHARE_ALL.slice(0,6);
   }
-  if(!sCharts.prodShare) return;
+  if(!sCharts.prodShare||!items.length) return;
   sCharts.prodShare.data.labels=items.map(function(x){return x.code;});
   sCharts.prodShare.data.datasets[0].data=items.map(function(x){return x.pct;});
   sCharts.prodShare.data.datasets[0].backgroundColor=items.map(function(x){return S_PROD_COLORS[x.code]||'#94a3b8';});
@@ -2748,6 +2756,7 @@ function sUpdAll(){
   sUpdCustList();
   sUpdProds();
   sUpdFurnCards();
+  sBuildOD();
 }
 
 function sUpdMainChart(){
