@@ -2620,12 +2620,12 @@ function sUpdProds(){
     var pv=p.price||0;
     var oc="sSetProd('"+(act?'_null_':p.code)+"')";
     html+='<tr class="'+(act?'active':'')+'" onclick="'+oc+'">';
-    html+='<td style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;">'+p.code+'</td>';
+    html+='<td style="font-family:monospace,monospace;font-size:11px;">'+p.code+'</td>';
     html+='<td>'+p.name+'</td>';
     html+='<td>'+sGrpChip(p.grp)+'</td>';
-    html+='<td class="r" style="font-family:\'IBM Plex Mono\',monospace;">'+sFmtM(nv)+'</td>';
-    html+='<td class="r" style="font-family:\'IBM Plex Mono\',monospace;">'+sFmtN(qv)+'</td>';
-    html+='<td class="r"><span style="font-family:\'IBM Plex Mono\',monospace;font-weight:600;color:'+(p.grp==='CL'?'#ea580c':'var(--text)')+'">'+pv.toFixed(2)+'</span></td>';
+    html+='<td class="r" style="font-family:monospace,monospace;">'+sFmtM(nv)+'</td>';
+    html+='<td class="r" style="font-family:monospace,monospace;">'+sFmtN(qv)+'</td>';
+    html+='<td class="r"><span style="font-family:monospace,monospace;font-weight:600;color:'+(p.grp==='CL'?'#ea580c':'var(--text)')+'">'+pv.toFixed(2)+'</span></td>';
     html+='</tr>';
   });
   document.getElementById('s-prodBody').innerHTML=html||'<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">ไม่มีข้อมูล</td></tr>';
@@ -2685,7 +2685,7 @@ function sBuildOD(){
     var fgCol={'CL':'#ea580c','SL-2.x':'#1a56db','SL-3.x':'#0d7a4a'}[domGrp]||'#94a3b8';
     html+='<tr><td style="color:var(--text2);">'+c.name+'</td>';
     html+='<td><span style="font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;background:'+bgCol+';color:'+fgCol+';">'+domGrp+'</span></td>';
-    html+='<td class="r" style="font-family:'IBM Plex Mono',monospace;font-weight:600;">฿'+sFmtM(c.net_all)+'M</td>';
+    html+='<td class="r" style="font-family:monospace;font-weight:600;">฿'+sFmtM(c.net_all)+'M</td>';
     html+='<td class="r" style="color:var(--text3);">'+sFmtN(Math.round(c.qty_ton||0))+' ตัน</td></tr>';
   });
   document.getElementById('s-odBody').innerHTML=html||'<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">ไม่มีข้อมูล</td></tr>';
