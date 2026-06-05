@@ -2545,10 +2545,21 @@ function sUpdCustMix(){
     grpData={'SL-2.x':Math.round(sl2*100)/100,'SL-3.x':Math.round(sl3*100)/100,'CL':Math.round(cl*100)/100};
     document.getElementById('s-mixSub').textContent=m?'เดือน'+S_MONTHS_TH[m]:'ภาพรวมทั้งหมด';
   } else {
-    var c=S_CUSTOMERS.find(function(x){return x.cc===custF;});
+    var c=S_CUSTOMERS.find(function(x){return String(x.cc)===String(custF);});
     if(!c)return;
-    grpData=m&&c.grp_mix_m&&c.grp_mix_m[m]?c.grp_mix_m[m]:c.grp_mix_all;
-    document.getElementById('s-mixSub').textContent=c.name.substring(0,14)+'...';
+    // ถ้าเลือกเดือน ใช้ grp_mix จาก monthly key
+    if(m){
+      var mmKey2='2026-'+(m<10?'0':'')+m;
+      var mNet=c.monthly?c.monthly[mmKey2]||0:0;
+      grpData={};
+      Object.keys(c.grp_mix_all).forEach(function(g){
+        var ratio=c.net_all>0?c.grp_mix_all[g]/c.net_all:0;
+        if(ratio>0&&mNet>0) grpData[g]=Math.round(mNet*ratio*100)/100;
+      });
+    } else {
+      grpData=c.grp_mix_all;
+    }
+    document.getElementById('s-mixSub').textContent=c.name.substring(0,16)+'...';
   }
   var labels=Object.keys(grpData).filter(function(k){return grpData[k]>0;});
   var colMap={'CL':S_C_CL,'SL-2.x':S_C_SL2,'SL-3.x':S_C_SL3};
@@ -2584,7 +2595,7 @@ function sUpdCustList(){
     var val=m?c.monthly[m]||0:c.net_all;
     if(val<=0&&m) return;
     var bw=Math.round(val/maxV*100);
-    var act=custF===c.cc;
+    var act=String(custF)===String(c.cc);
     var domGrp=Object.keys(c.grp_mix_all).sort(function(a,b){return c.grp_mix_all[b]-c.grp_mix_all[a];})[0];
     var keys=Object.keys(c.grp_mix_all);
     var tl=keys.length>1?'Mixed':domGrp;
@@ -2677,20 +2688,27 @@ function sBuildFurnBar(){
 }
 
 function sBuildOD(){
-  // Zone D: แสดง top customers จากข้อมูลจริง
+  // Zone D: mock AR data (ข้อมูล duedate จาก Winspeed ยังไม่พร้อม)
+  var od=[
+    {name:'ไลอ้อน (ไทย) [150]',cat:'overdue',net:5.2,inv:18},
+    {name:'เช่วเฉิน ซิลิก้า',cat:'overdue',net:4.8,inv:12},
+    {name:'ไทยซิลิเกตเคมิคัล',cat:'overdue',net:2.1,inv:8},
+    {name:'ฮิวเทค (เอเซีย)',cat:'overdue',net:1.4,inv:5},
+    {name:'สันติภาพ 05',cat:'overdue',net:1.1,inv:6},
+    {name:'ยูนิลีเวอร์ ไทย',cat:'due7',net:3.8,inv:10},
+    {name:'คาโอ อินดัสเตรียล',cat:'due7',net:2.1,inv:7},
+    {name:'ซิก้า (ประเทศไทย)',cat:'due7',net:1.4,inv:5}
+  ];
   var html='';
-  S_CUSTOMERS.slice(0,8).forEach(function(c){
-    var domGrp=Object.keys(c.grp_mix_all).sort(function(a,b){return c.grp_mix_all[b]-c.grp_mix_all[a];})[0]||'SL-2.x';
-    var bgCol={'CL':'#fff3ec','SL-2.x':'#eff3ff','SL-3.x':'#f0fdf4'}[domGrp]||'#f1f5f9';
-    var fgCol={'CL':'#ea580c','SL-2.x':'#1a56db','SL-3.x':'#0d7a4a'}[domGrp]||'#94a3b8';
-    html+='<tr><td style="color:var(--text2);">'+c.name+'</td>';
-    html+='<td><span style="font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;background:'+bgCol+';color:'+fgCol+';">'+domGrp+'</span></td>';
-    html+='<td class="r" style="font-family:monospace;font-weight:600;">฿'+sFmtM(c.net_all)+'M</td>';
-    html+='<td class="r" style="color:var(--text3);">'+sFmtN(Math.round(c.qty_ton||0))+' ตัน</td></tr>';
+  od.forEach(function(r){
+    html+='<tr><td>'+r.name+'</td>';
+    html+='<td><span class="od-badge '+(r.cat==='overdue'?'od-o':'od-7')+'">'+(r.cat==='overdue'?'เกินกำหนด':'ครบ 7 วัน')+'</span></td>';
+    html+='<td class="r">฿'+sFmtM(r.net)+'M</td>';
+    html+='<td class="r">'+r.inv+'</td></tr>';
   });
-  document.getElementById('s-odBody').innerHTML=html||'<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">ไม่มีข้อมูล</td></tr>';
+  document.getElementById('s-odBody').innerHTML=html;
   var hdr=document.querySelector('.od-table thead tr');
-  if(hdr) hdr.innerHTML='<th>ลูกค้า</th><th>กลุ่ม</th><th class="r">ยอดขายรวม</th><th class="r">ปริมาณ</th>';
+  if(hdr) hdr.innerHTML='<th>ลูกค้า</th><th>สถานะ</th><th class="r">ยอด (฿)</th><th class="r">Invoice</th>';
 }
 
 function sUpdTypeRevLine(){
