@@ -2407,7 +2407,7 @@ function sUpdKPI(){
 
   document.getElementById('s-kv1').textContent=sFmtM(net);
   document.getElementById('s-kv2').textContent=sFmtN(Math.round(filtQty));
-  document.getElementById('s-kv3').textContent=m?'—':(S_SUMMARY.invoice_count?sFmtN(S_SUMMARY.invoice_count):'—');
+  document.getElementById('s-kv3').textContent=S_SUMMARY.invoice_count?sFmtN(S_SUMMARY.invoice_count):'—';
   document.getElementById('s-kv4').textContent=m?(Object.keys(custSet).length||'—'):(S_SUMMARY.customer_count?S_SUMMARY.customer_count:Object.keys(custSet).length||'—');
   var lbl=g?g+' · ':'';
   var mlbl=m?'เดือน'+S_MONTHS_TH[m]:'ทั้งหมด';
@@ -2518,7 +2518,7 @@ function sUpdConcDonut(m){
   var mmKey=m?('2026-'+(m<10?'0':'')+m):null;
   var custNets=[];
   S_CUSTOMERS.forEach(function(c){
-    var v=mmKey?(c.monthly?c.monthly[mmKey]||0:0):c.net_all;
+    var v=m?(c.monthly?c.monthly[m]||0:0):c.net_all;
     if(v>0) custNets.push({name:c.name,net:v});
   });
   custNets.sort(function(a,b){return b.net-a.net;});
@@ -2563,7 +2563,7 @@ function sUpdCustMix(){
     // ถ้าเลือกเดือน ใช้ grp_mix จาก monthly key
     if(m){
       var mmKey2='2026-'+(m<10?'0':'')+m;
-      var mNet=c.monthly?c.monthly[mmKey2]||0:0;
+      var mNet=c.monthly?c.monthly[m]||0:0;
       grpData={};
       Object.keys(c.grp_mix_all).forEach(function(g){
         var ratio=c.net_all>0?c.grp_mix_all[g]/c.net_all:0;
@@ -2615,7 +2615,7 @@ function sUpdCustList(){
     var tc=keys.length>1?'tag-mix':({'CL':'tag-cl','SL-2.x':'tag-sl2','SL-3.x':'tag-sl3'}[domGrp]||'');
     var bc={'CL':S_C_CL,'SL-2.x':S_C_SL2,'SL-3.x':S_C_SL3}[domGrp]||'#94a3b8';
     var p=Math.round(val/tot*100);
-    html+='<div class="s-cust-row'+(act?' active':'')+'" onclick="sSetCust('+(act?0:'"'+c.cc+'"')+')">';
+    html+='<div class="s-cust-row'+(act?' active':'')+'" onclick="sSetCust(this.getAttribute(\'data-cc\'))" data-cc="'+c.cc+'">';
     html+='<div class="s-cust-top"><span class="s-cust-name">'+c.name+'<span class="ctag '+tc+'">'+tl+'</span></span>';
     html+='<span class="s-cust-val">'+sFmtM(val)+'M <span class="s-cpct">('+p+'%)</span></span></div>';
     html+='<div class="s-cust-bar"><div class="s-cust-barf" style="width:'+bw+'%;background:'+bc+'"></div></div>';
