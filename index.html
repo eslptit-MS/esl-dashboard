@@ -2159,6 +2159,7 @@ var S_PROD_COLORS = {
   'SL-3.4L':'#0891b2','SL-3.4M':'#7c3aed','อื่นๆ':'#94a3b8'
 };
 var S_FRESHNESS = null;
+var S_AR = null;
 var S_SUMMARY = {total_net_mb:0, total_qty_ton:0, invoice_count:0, customer_count:0};
 
 // ── Month names (dynamic จาก API) ──
@@ -2264,8 +2265,9 @@ function sLoadData(year, callback) {
         });
       });
 
-      // freshness
+      // freshness & AR
       S_FRESHNESS = data.freshness;
+      S_AR = data.ar || null;
 
       // หาเดือนที่มีข้อมูล
       var mSet={};
@@ -2631,31 +2633,35 @@ function sUpdProds(){
   var grpF=sState.grp,prodF=sState.prod,custF=sState.cust,m=sState.month;
   var prods=S_PRODUCTS.slice();
   if(grpF)prods=prods.filter(function(p){return p.grp===grpF;});
-  // filter by actual products customer bought
+  // filter by exact products from prod_months
   if(custF){
     var cust=S_CUSTOMERS.find(function(x){return String(x.cc)===String(custF);});
-    if(cust){
-      // รวม product codes ที่ลูกค้านี้ซื้อจาก prod_months
+    if(cust&&cust.prod_months){
+      var pm=cust.prod_months;
+      // รวม product codes ที่ลูกค้าซื้อจริง
       var custCodes={};
-      var pm=cust.prod_months||{};
       if(m){
-        // เดือนที่เลือก
         var mmKeyC='2026-'+(m<10?'0':'')+m;
         var mProds=pm[mmKeyC]||{};
-        Object.keys(mProds).forEach(function(code){custCodes[code]=true;});
+        Object.keys(mProds).forEach(function(code){custCodes[code]=mProds[code];});
       } else {
-        // ทุกเดือน
         Object.keys(pm).forEach(function(mk){
-          Object.keys(pm[mk]).forEach(function(code){custCodes[code]=true;});
+          Object.keys(pm[mk]).forEach(function(code){
+            custCodes[code]=(custCodes[code]||0)+pm[mk][code];
+          });
         });
       }
       var codes=Object.keys(custCodes);
       if(codes.length>0){
-        prods=prods.filter(function(p){return custCodes[p.code];});
-      } else {
-        // fallback: filter by grp
-        var custGrps=Object.keys(cust.grp_mix_all||{});
-        if(custGrps.length>0) prods=prods.filter(function(p){return custGrps.indexOf(p.grp)>=0;});
+        prods=prods.filter(function(p){return custCodes[p.code]!==undefined;});
+        // แทน net ด้วยยอดของลูกค้านั้นจริงๆ
+        prods=prods.map(function(p){
+          var clone={};
+          Object.keys(p).forEach(function(k){clone[k]=p[k];});
+          clone._custNet=Math.round((custCodes[p.code]||0)*100)/100;
+          return clone;
+        });
+        prods.sort(function(a,b){return (b._custNet||0)-(a._custNet||0);});
       }
     }
   }
@@ -2668,7 +2674,7 @@ function sUpdProds(){
   var html='';
   prods.forEach(function(p){
     var act=prodF===p.code;
-    var nv=m?(p.monthly[m]||0):p.net_all;
+    var nv=custF&&p._custNet!==undefined?p._custNet:(m?(p.monthly[m]||0):p.net_all);
     var qv=p.price>0?Math.round(nv/p.price*1000):Math.round(p.qty_ton||0);
     var pv=p.price||0;
     var oc="sSetProd('"+(act?'_null_':p.code)+"')";
@@ -2730,24 +2736,39 @@ function sBuildFurnBar(){
 }
 
 function sBuildOD(){
-  // Zone D: mock AR data (ข้อมูล duedate จาก Winspeed ยังไม่พร้อม)
-  var od=[
-    {name:'ไลอ้อน (ไทย) [150]',cat:'overdue',net:5.2,inv:18},
-    {name:'เช่วเฉิน ซิลิก้า',cat:'overdue',net:4.8,inv:12},
-    {name:'ไทยซิลิเกตเคมิคัล',cat:'overdue',net:2.1,inv:8},
-    {name:'ฮิวเทค (เอเซีย)',cat:'overdue',net:1.4,inv:5},
-    {name:'สันติภาพ 05',cat:'overdue',net:1.1,inv:6},
-    {name:'ยูนิลีเวอร์ ไทย',cat:'due7',net:3.8,inv:10},
-    {name:'คาโอ อินดัสเตรียล',cat:'due7',net:2.1,inv:7},
-    {name:'ซิก้า (ประเทศไทย)',cat:'due7',net:1.4,inv:5}
-  ];
+  // Zone D: AR จาก duedate จริง
+  if(!S_AR){
+    document.getElementById('s-odBody').innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">กำลังโหลด...</td></tr>';
+    return;
+  }
+  // อัปเดต KPI cards
+  var paidEl=document.querySelector('.ar-paid .ar-val');
+  var due7El=document.querySelector('.ar-warn .ar-val');
+  var overEl=document.querySelector('.ar-over .ar-val');
+  var paidCt=document.querySelector('.ar-paid .ar-ct');
+  var due7Ct=document.querySelector('.ar-warn .ar-ct');
+  var overCt=document.querySelector('.ar-over .ar-ct');
+  if(paidEl) paidEl.textContent='฿'+sFmtM(S_AR.paid.net)+'M';
+  if(due7El) due7El.textContent='฿'+sFmtM(S_AR.due7.net)+'M';
+  if(overEl) overEl.textContent='฿'+sFmtM(S_AR.over.net)+'M';
+  if(paidCt) paidCt.textContent=sFmtN(S_AR.paid.count)+' รายการ';
+  if(due7Ct) due7Ct.textContent='ครบใน 7 วัน ('+sFmtN(S_AR.due7.count)+' รายการ)';
+  if(overCt) overCt.textContent='ณ '+S_AR.as_of+' ('+sFmtN(S_AR.over.count)+' รายการ)';
+  // ตารางรวม overdue + due7
   var html='';
-  od.forEach(function(r){
+  (S_AR.over.items||[]).forEach(function(r){
     html+='<tr><td>'+r.name+'</td>';
-    html+='<td><span class="od-badge '+(r.cat==='overdue'?'od-o':'od-7')+'">'+(r.cat==='overdue'?'เกินกำหนด':'ครบ 7 วัน')+'</span></td>';
+    html+='<td><span class="od-badge od-o">เกินกำหนด</span></td>';
     html+='<td class="r">฿'+sFmtM(r.net)+'M</td>';
-    html+='<td class="r">'+r.inv+'</td></tr>';
+    html+='<td class="r">'+r.count+'</td></tr>';
   });
+  (S_AR.due7.items||[]).forEach(function(r){
+    html+='<tr><td>'+r.name+'</td>';
+    html+='<td><span class="od-badge od-7">ครบ 7 วัน</span></td>';
+    html+='<td class="r">฿'+sFmtM(r.net)+'M</td>';
+    html+='<td class="r">'+r.count+'</td></tr>';
+  });
+  if(!html) html='<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">ไม่มีรายการค้างชำระ</td></tr>';
   document.getElementById('s-odBody').innerHTML=html;
   var hdr=document.querySelector('.od-table thead tr');
   if(hdr) hdr.innerHTML='<th>ลูกค้า</th><th>สถานะ</th><th class="r">ยอด (฿)</th><th class="r">Invoice</th>';
