@@ -1,0 +1,2805 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ESL Portal — Executive Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#f4f5f7;--surface:#fff;--border:#e2e5ea;--border-s:#c8cdd6;
+  --text:#1a1d23;--text2:#5a6275;--text3:#9ba3b2;
+  --navy:#1e3a8a;--navy-l:#eff2ff;
+  --green:#16a34a;--green-l:#dcfce7;
+  --amber:#a16207;--amber-l:#fef9c3;
+  --red:#b91c1c;--red-l:#fee2e2;
+  --orange:#c2410c;--orange-l:#fff7ed;
+  --teal:#0e7490;--teal-l:#ecfeff;
+  --blue:#2563eb;--pink:#9d174d;
+  --r:8px;--rl:12px;
+  --font:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;}
+.shell{display:flex;min-height:100vh;}
+
+/* ── Sidebar ── */
+.sb{width:200px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:20;}
+.sb-logo{padding:16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.sb-ico{width:34px;height:34px;border-radius:var(--r);background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sb-ico i{color:#fff;font-size:17px;}
+.sb-t{font-size:14px;font-weight:500;}.sb-s{font-size:10px;color:var(--text3);}
+.sb-sec{padding:14px 14px 4px;font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 12px;margin:1px 6px;border-radius:var(--r);color:var(--text2);font-size:12.5px;cursor:pointer;text-decoration:none;transition:all .15s;}
+.sb-item i{font-size:17px;}
+.sb-item:hover{background:var(--bg);color:var(--text);}
+.sb-item.active{background:var(--navy-l);color:var(--navy);font-weight:500;}
+.sb-item.active i{color:var(--navy);}
+.sb-foot{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px;}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+/* ── Topbar ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;}
+.tb-title{font-size:15px;font-weight:500;}.tb-co{font-size:11px;color:var(--text3);margin-left:6px;}
+.tb-r{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;}
+.export-btn{display:flex;align-items:center;gap:5px;font-size:11px;padding:5px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;}
+.export-btn:hover{background:var(--bg);}
+
+/* ── Page container ── */
+.page{display:none;flex-direction:column;flex:1;}
+.page.active{display:flex;}
+
+/* ── Sub-tabs (CL/SL) ── */
+.prod-tabs{display:flex;border-bottom:2px solid var(--border);background:var(--surface);padding:0 24px;}
+.ptab{padding:11px 18px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.ptab.active-cl{color:var(--navy);border-bottom-color:var(--navy);}
+.ptab.active-sl{color:var(--teal);border-bottom-color:var(--teal);}
+.ptab-badge{font-size:10px;padding:2px 7px;border-radius:20px;margin-left:6px;}
+.ptab.active-cl .ptab-badge{background:var(--navy-l);color:var(--navy);}
+.ptab.active-sl .ptab-badge{background:var(--teal-l);color:var(--teal);}
+
+/* ── Period bar ── */
+.period-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.p-lbl{font-size:11.5px;color:var(--text2);font-weight:500;}
+.seg{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:2px;gap:2px;}
+.seg-b{font-size:11px;padding:4px 11px;border-radius:6px;color:var(--text2);cursor:pointer;transition:all .15s;}
+.seg-b.active{background:var(--surface);color:var(--navy);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.seg-b.active-teal{background:var(--surface);color:var(--teal);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.m-seg{display:flex;gap:3px;flex-wrap:wrap;}
+.m-btn{font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--border);color:var(--text2);cursor:pointer;background:var(--bg);transition:all .15s;}
+.m-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:500;}
+.m-btn.disabled{color:var(--text3);cursor:default;}
+.shift-seg{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:2px;}
+.sh-btn{font-size:11px;padding:4px 12px;border-radius:6px;color:var(--text2);cursor:pointer;transition:all .15s;}
+.sh-btn.active{background:var(--navy);color:#fff;font-weight:500;}
+.sh-sts{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;}
+.sh-st{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
+.sh-dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+.p-info{margin-left:auto;font-size:10.5px;color:var(--text3);display:flex;align-items:center;gap:6px;}
+.cfg-tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;}
+
+/* ── Content ── */
+.content{padding:20px 24px;display:flex;flex-direction:column;gap:18px;}
+
+/* ── Zone header ── */
+.z-hdr{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.z-hdr i{font-size:14px;color:var(--navy);}
+.z-hdr.teal i{color:var(--teal);}
+
+/* ── KPI ── */
+.kpi-g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;}
+.kpi-c{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px;transition:border-color .2s;}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.kpi-ico{width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;}
+.kpi-ico i{font-size:17px;}
+.badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;}
+.b-ok{background:var(--green-l);color:var(--green);}
+.b-wn{background:var(--amber-l);color:var(--amber);}
+.b-bd{background:var(--red-l);color:var(--red);}
+.b-info{background:var(--navy-l);color:var(--navy);}
+.b-teal{background:var(--teal-l);color:var(--teal);}
+.kv{font-size:21px;font-weight:500;line-height:1;margin-bottom:3px;}
+.ku{font-size:11px;font-weight:400;color:var(--text2);}
+.kl{font-size:11px;color:var(--text2);margin-bottom:8px;}
+.kcmp{display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:5px;}
+.kp{color:var(--text3);}.kd{font-weight:500;}
+.ok{color:var(--green);}.wn{color:var(--amber);}.bd{color:var(--red);}.nv{color:var(--navy);}.tc{color:var(--teal);}
+.kbar{height:4px;background:var(--bg);border-radius:2px;}
+.kbf{height:100%;border-radius:2px;}
+.knt{margin-top:4px;font-size:10px;color:var(--text3);}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px;transition:border-color .2s;}
+.card.hi{border-color:#93c5fd;}
+.c-title{font-size:12px;font-weight:500;margin-bottom:3px;}
+.c-sub{font-size:10.5px;color:var(--text3);margin-bottom:10px;}
+.leg-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:11px;color:var(--text2);}
+.leg{display:flex;align-items:center;gap:4px;}
+.lsq{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.click-hint{font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px;margin-bottom:8px;}
+.click-hint i{font-size:12px;color:var(--teal);}
+
+/* ── Layouts ── */
+.charts-2{display:grid;grid-template-columns:3fr 1fr;gap:11px;}
+.charts-2b{display:grid;grid-template-columns:2fr 1fr;gap:11px;}
+.sum-g{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.f-g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;}
+.chart-h{height:250px;position:relative;width:100%;}
+.chart-h-sm{height:210px;position:relative;width:100%;}
+.chart-h-md{height:280px;position:relative;width:100%;}
+.chart-h-lg{height:340px;position:relative;width:100%;}
+
+/* ── Furnace cards ── */
+.f-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:12px;}
+.f-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.f-name{font-size:12px;font-weight:500;}
+.f-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;}
+.fb-run{background:var(--green-l);color:var(--green);}
+.fb-stop{background:var(--amber-l);color:var(--amber);}
+.f-big-row{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:2px;}
+.f-big{font-size:20px;font-weight:500;color:var(--navy);}
+.f-bu{font-size:10px;color:var(--text2);}
+.f-vn{font-size:11px;color:var(--orange);font-weight:500;background:var(--orange-l);border:1px solid #fed7aa;border-radius:6px;padding:2px 7px;white-space:nowrap;}
+.f-vs{font-size:11px;margin:3px 0 7px;}
+.f-pb{height:4px;background:var(--bg);border-radius:2px;margin-bottom:10px;}
+.f-pbf{height:100%;border-radius:2px;}
+.f-div{border:none;border-top:1px solid var(--border);margin:8px 0;}
+.f-sec{font-size:10px;color:var(--text3);font-weight:500;margin-bottom:4px;}
+.f-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;}
+.fk{color:var(--text2);}.fv{font-weight:500;}
+.f-stop{text-align:center;padding:18px 6px;}
+.f-stop i{font-size:26px;color:var(--amber);display:block;margin-bottom:6px;}
+.f-stop-cap{margin-top:10px;background:var(--bg);border-radius:var(--r);padding:8px;font-size:11px;color:var(--text2);}
+.f-cap-n{font-size:14px;font-weight:500;color:var(--amber);display:block;margin-top:2px;}
+
+/* ── Table ── */
+.tbl-w{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:11.5px;}
+thead th{background:var(--bg);padding:7px 11px;text-align:left;font-weight:500;font-size:10.5px;color:var(--text2);border-bottom:1px solid var(--border-s);white-space:nowrap;}
+thead th.r{text-align:right;}
+tbody td{padding:7px 11px;border-bottom:0.5px solid var(--border);white-space:nowrap;}
+tbody td.r{text-align:right;}.tbody td.m{color:var(--text3);}
+.tr-tot td{background:#f0f4ff;font-weight:500;border-top:1px solid var(--border-s);border-bottom:none;}
+.tr-sec td{background:#fafbff;font-weight:500;}
+.tr-sub td{padding-left:22px;}
+.chip{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.cok{background:var(--green-l);color:var(--green);}
+.cwn{background:var(--amber-l);color:var(--amber);}
+.cbd{background:var(--red-l);color:var(--red);}
+
+/* ── Alert/Insight ── */
+.ins-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.ins{border-radius:var(--rl);padding:11px 13px;}
+.ins-bd{background:var(--red-l);border:0.5px solid #fca5a5;}
+.ins-wn{background:var(--amber-l);border:0.5px solid #fde047;}
+.ins-ok{background:var(--green-l);border:0.5px solid #86efac;}
+.ins-hd{font-size:11px;font-weight:500;margin-bottom:3px;display:flex;align-items:center;gap:4px;}
+.ins-hd i{font-size:13px;}
+.ins-bd .ins-hd{color:var(--red);}.ins-wn .ins-hd{color:var(--amber);}.ins-ok .ins-hd{color:var(--green);}
+.ins-body{font-size:11px;line-height:1.55;}
+.ins-bd .ins-body{color:var(--red);}.ins-wn .ins-body{color:var(--amber);}.ins-ok .ins-body{color:var(--green);}
+
+/* ── Filter bar ── */
+.filter-bar{background:var(--navy-l);border:1px solid #bfdbfe;border-radius:var(--rl);padding:7px 13px;display:none;align-items:center;gap:8px;flex-wrap:wrap;}
+.filter-bar.show{display:flex;}
+.f-tag{background:#fff;border:1px solid #93c5fd;border-radius:20px;padding:2px 9px;font-size:11px;color:var(--navy);font-weight:500;display:flex;align-items:center;gap:4px;}
+.f-tag i{font-size:12px;cursor:pointer;color:#94a3b8;}
+.f-tag i:hover{color:var(--red);}
+.f-reset{margin-left:auto;font-size:11px;color:var(--navy);cursor:pointer;display:flex;align-items:center;gap:3px;padding:2px 9px;border-radius:20px;border:1px solid #93c5fd;background:#fff;}
+.f-reset:hover{background:var(--red-l);color:var(--red);border-color:#fca5a5;}
+
+/* ── Freshness ── */
+.fresh-bar{background:#fff8ec;border:1px solid #fde047;border-radius:var(--rl);padding:9px 14px;display:flex;align-items:center;gap:10px;}
+.fresh-text{font-size:11.5px;color:var(--amber);flex:1;}
+.fresh-days{background:var(--amber-l);color:var(--amber);font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;white-space:nowrap;}
+
+/* ── VN pill ── */
+.vn-pill{font-size:10px;background:var(--orange-l);color:var(--orange);border:1px solid #fed7aa;border-radius:var(--r);padding:2px 8px;font-weight:500;}
+.vn-target-line{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--orange);}
+
+/* ── SL Type legend ── */
+#slTypeLegend{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:11px;}
+.leg-grp-hdr{display:flex;justify-content:space-between;padding:3px 0;border-bottom:0.5px solid var(--border);font-weight:500;}
+.leg-sub-row{display:flex;justify-content:space-between;padding:2px 0 2px 13px;}
+
+.sec{display:flex;flex-direction:column;gap:10px;}
+
+.cfg-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.cfg-lbl{font-size:12px;color:var(--text2);flex:1;}
+.cfg-inp-wrap{display:flex;align-items:center;gap:6px;}
+.cfg-inp{width:90px;border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;font-size:13px;font-weight:500;font-family:var(--mono);color:var(--text);background:var(--surface2);text-align:right;}
+.cfg-inp:focus{outline:none;border-color:var(--blue);background:var(--blue-l);}
+.cfg-unit{font-size:11px;color:var(--text3);white-space:nowrap;min-width:40px;}
+
+/* ── SALES PAGE STYLES ── */
+.sl-cl{--cl:#ea580c;--cl-l:#fff3ec;}
+.sl-navy-ll{background:#e8eef7;}
+.sl-navy-b{border-color:#b8cce4;}
+.fstrip{background:var(--surface);border-bottom:1.5px solid var(--border);padding:7px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:46px;z-index:40;transition:border-color .2s;}
+.fstrip.on{border-bottom-color:#1a3352;}
+.fl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.s-seg{display:flex;background:#e8eef7;border-radius:9px;padding:3px;gap:2px;border:1.5px solid #b8cce4;}
+.mp{padding:5px 13px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:#64748b;transition:all .15s;user-select:none;}
+.mp:hover{color:#1a3352;}
+.mp.active{background:#1a3352;color:#fff;font-weight:600;box-shadow:0 2px 6px rgba(26,51,82,.3);}
+.mp.partial::after{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:#f59e0b;margin-left:4px;vertical-align:middle;}
+.s-sep{width:1px;height:22px;background:var(--border-s);}
+.gp{font-size:12px;padding:4px 13px;border-radius:20px;cursor:pointer;border:1.5px solid;font-weight:600;transition:all .15s;opacity:.35;user-select:none;}
+.gp.active{opacity:1;box-shadow:0 2px 5px rgba(0,0,0,.1);}
+.gp-cl{background:#fff3ec;color:#c2410c;border-color:#ea580c;}
+.gp-sl2{background:var(--navy-l);color:#1d4ed8;border-color:var(--blue);}
+.gp-sl3{background:var(--green-l);color:#15803d;border-color:var(--green);}
+.rst{margin-left:auto;padding:4px 11px;border-radius:20px;font-size:11px;color:var(--text3);border:1px solid var(--border-s);cursor:pointer;transition:all .15s;}
+.rst:hover{color:var(--text2);border-color:var(--text3);}
+.rst.hot{background:#fff3ec;border-color:#ea580c;color:#c2410c;font-weight:600;}
+.s-content{padding:8px 20px;display:flex;flex-direction:column;gap:8px;}
+.s-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.zh{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.zh i{font-size:12px;}
+.zh-lbl{font-weight:400;text-transform:none;letter-spacing:0;color:var(--blue);}
+.s-ct{font-size:11.5px;font-weight:600;}
+.s-cs{font-size:10px;color:var(--text3);margin-bottom:5px;}
+.s-leg-row{display:flex;gap:6px;flex-wrap:wrap;font-size:10px;color:var(--text2);margin-bottom:4px;}
+.s-leg{display:flex;align-items:center;gap:4px;}
+.s-lsq{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.s-kpi-g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
+.s-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:9px 12px;position:relative;overflow:hidden;}
+.s-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;}
+.skc1::before{background:var(--blue);}
+.skc2::before{background:var(--green);}
+.skc3::before{background:#7c3aed;}
+.skc4::before{background:#f59e0b;}
+.s-kpi-lbl{font-size:10px;color:var(--text2);margin-bottom:4px;}
+.s-kpi-val{font-size:20px;font-weight:600;font-family:'IBM Plex Mono',monospace;line-height:1;margin-bottom:1px;}
+.s-kpi-sub{font-size:10px;color:var(--text3);}
+.s-kpi-cmp{font-size:9.5px;position:absolute;top:9px;right:10px;padding:2px 6px;border-radius:4px;font-weight:600;}
+.s-zb-grid{display:grid;grid-template-columns:3fr 2fr;gap:10px;align-items:start;}
+.s-sub4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px;}
+.s-sub-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:7px 8px;min-height:110px;}
+.s-chart-main{height:130px;position:relative;margin-top:4px;}
+.s-chart-sub{height:60px;position:relative;}
+.s-cust-list{display:flex;flex-direction:column;gap:4px;}
+.s-cust-row{cursor:pointer;padding:4px 6px;border-radius:var(--r);transition:background .12s;}
+.s-cust-row:hover{background:var(--bg);}
+.s-cust-row.active{background:#e8eef7;border:1px solid #b8cce4;}
+.s-cust-top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px;}
+.s-cust-name{font-size:11px;color:var(--text);display:flex;align-items:center;gap:5px;}
+.ctag{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:600;}
+.tag-cl{background:#fff3ec;color:#c2410c;}
+.tag-sl2{background:var(--navy-l);color:#1d4ed8;}
+.tag-sl3{background:var(--green-l);color:#15803d;}
+.tag-mix{background:var(--bg);color:var(--text3);}
+.s-cust-val{font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;white-space:nowrap;color:var(--text);}
+.s-cpct{font-size:10px;color:var(--text3);font-weight:400;}
+.s-cust-bar{height:4px;background:var(--border);border-radius:2px;margin-top:1px;}
+.s-cust-barf{height:100%;border-radius:2px;transition:width .3s;}
+.s-conc-abs{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.conc-names{margin-top:4px;}
+.cname{font-size:9.5px;margin:1px 0;}
+.risk-track{height:3px;border-radius:2px;background:linear-gradient(90deg,#16a34a,#fbbf24 50%,#ef4444);position:relative;margin-top:4px;}
+.risk-needle{position:absolute;top:-4px;width:2px;height:11px;background:#1e3a8a;border-radius:1px;transform:translateX(-50%);}
+.s-zc-grid{display:grid;grid-template-columns:3fr 2fr;gap:8px;}
+.prod-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+.prod-table th{background:var(--bg);padding:5px 8px;font-size:10px;font-weight:600;color:var(--text3);text-align:left;}
+.prod-table th.r,.prod-table td.r{text-align:right;}
+.prod-table td{padding:4px 8px;border-bottom:.5px solid var(--border);cursor:pointer;}
+.prod-table tr:hover td{background:var(--bg);}
+.prod-table tr.active td{background:#e8eef7;}
+.grp-chip{display:inline-block;font-size:9.5px;padding:1px 7px;border-radius:10px;font-weight:600;}
+.chip-cl{background:#fff3ec;color:#c2410c;}
+.chip-sl2{background:var(--navy-l);color:#1d4ed8;}
+.chip-sl3{background:var(--green-l);color:#15803d;}
+.furn-g{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+.furn-c{border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;}
+.furn-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.furn-val{font-size:16px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+.furn-sub{font-size:9.5px;color:var(--text3);}
+.furn-bar{height:4px;background:var(--border);border-radius:2px;margin-top:5px;}
+.furn-barf{height:100%;border-radius:2px;}
+.ar-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:8px;}
+.ar-card{border-radius:var(--r);padding:8px 12px;}
+.ar-paid{background:var(--green-l);border:1px solid #86efac;}
+.ar-warn{background:var(--amber-l);border:1px solid #fde047;}
+.ar-over{background:var(--red-l);border:1px solid #fca5a5;}
+.ar-hd{font-size:10px;font-weight:600;display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+.s-paid{color:#15803d;}.s-warn{color:#92400e;}.s-over{color:#b91c1c;}
+.ar-val{font-size:16px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+.ar-ct{font-size:10px;color:var(--text3);}
+.od-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+.od-table th{background:var(--bg);padding:5px 8px;font-size:10px;font-weight:600;color:var(--text3);text-align:left;}
+.od-table th.r,.od-table td.r{text-align:right;}
+.od-table td{padding:5px 8px;border-bottom:.5px solid var(--border);}
+.od-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
+.od-o{background:var(--red-l);color:#b91c1c;}
+.od-7{background:var(--amber-l);color:#92400e;}
+#s-tt{position:fixed;pointer-events:none;z-index:9999;background:var(--surface);border:1px solid var(--border-s);border-radius:var(--r);padding:8px 12px;box-shadow:0 4px 16px rgba(0,0,0,.12);font-family:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif;font-size:11.5px;min-width:140px;opacity:0;transition:opacity .1s;max-width:200px;}
+#s-tt.show{opacity:1;}
+#s-tt .tt-t{font-weight:600;margin-bottom:5px;color:#1e3a8a;font-size:12px;}
+#s-tt .tt-r{display:flex;align-items:center;gap:6px;padding:1px 0;}
+#s-tt .tt-d{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+#s-tt .tt-v{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-weight:500;}
+#s-tt .tt-f{border-top:1px solid var(--border);margin-top:4px;padding-top:4px;font-weight:600;color:#1e3a8a;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sb">
+  <div class="sb-logo">
+    <div class="sb-ico"><i class="ti ti-leaf" aria-hidden="true"></i></div>
+    <div><div class="sb-t">ESL Portal</div><div class="sb-s">Executive Dashboard</div></div>
+  </div>
+  <div class="sb-sec">ภาพรวม</div>
+  <div class="sb-item" onclick="nav('overview')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Overview</div>
+  <div class="sb-sec">ส่วนงาน</div>
+  <div class="sb-item active" id="nav-production" onclick="nav('production')"><i class="ti ti-building-factory-2" aria-hidden="true"></i>การผลิต</div>
+  <div class="sb-item" id="nav-sales" onclick="nav('sales')"><i class="ti ti-chart-bar" aria-hidden="true"></i>ยอดขาย</div>
+  <div class="sb-item" onclick="nav('wms')"><i class="ti ti-box" aria-hidden="true"></i>คลังสินค้า</div>
+  <div class="sb-item" onclick="nav('transport')"><i class="ti ti-truck" aria-hidden="true"></i>ขนส่ง</div>
+  <div class="sb-item" onclick="nav('energy')"><i class="ti ti-bolt" aria-hidden="true"></i>พลังงาน</div>
+  <div class="sb-sec">ระบบ</div>
+  <div class="sb-item" onclick="nav('config')"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>ตั้งค่า / Plan</div>
+  <div class="sb-item"><i class="ti ti-settings" aria-hidden="true"></i>Settings</div>
+  <div class="sb-foot"><i class="ti ti-clock" aria-hidden="true"></i>อัปเดต 06:35 น.</div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+<!-- Topbar -->
+<header class="topbar">
+  <div><span class="tb-title" id="topTitle">การผลิต</span><span class="tb-co">บริษัท อีสเทิร์นซิลิเกต จำกัด</span></div>
+  <div class="tb-r">
+    <div class="export-btn"><i class="ti ti-file-type-pdf" aria-hidden="true"></i>PDF</div>
+    <div class="export-btn"><i class="ti ti-table-export" aria-hidden="true"></i>Excel</div>
+    <div class="avatar">WJ</div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════ -->
+<!-- PAGE: PRODUCTION                   -->
+<!-- ══════════════════════════════════ -->
+<div class="page active" id="page-production">
+
+  <!-- CL / SL Tabs -->
+  <div class="prod-tabs">
+    <div class="ptab active-cl" id="tab-cl" onclick="switchProdTab('cl')">🪨 Cullet (CL)<span class="ptab-badge">Sodium Silicate ก้อน</span></div>
+    <div class="ptab" id="tab-sl" onclick="switchProdTab('sl')">💧 Liquid (SL)<span class="ptab-badge">Sodium Silicate น้ำ</span></div>
+  </div>
+
+  <!-- CL Sub-pages -->
+  <div id="cl-section">
+    <!-- CL Period / View -->
+    <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="p-lbl">ดูแบบ:</span>
+      <div class="seg">
+        <div class="seg-b active" id="cl-view-day" onclick="switchClView('day')">รายวัน</div>
+        <div class="seg-b" id="cl-view-month" onclick="switchClView('month')">รายเดือน</div>
+      </div>
+      <div id="cl-day-controls" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span class="p-lbl" style="margin-left:8px;">วันที่:</span>
+        <div class="seg-b" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:4px 12px;cursor:pointer;">📅 23 พ.ค. 2569</div>
+        <div class="shift-seg">
+          <div class="sh-btn active">ทั้งวัน</div>
+          <div class="sh-btn">กะเช้า</div>
+          <div class="sh-btn">กะบ่าย</div>
+          <div class="sh-btn">กะดึก</div>
+        </div>
+        <div class="sh-sts">
+          <div class="sh-st"><div class="sh-dot"></div>กะเช้า (06:30–14:30) ✓</div>
+          <div class="sh-st"><div class="sh-dot"></div>กะบ่าย (14:30–22:30) ✓</div>
+          <div class="sh-st"><div class="sh-dot"></div>กะดึก (22:30–06:30) ✓</div>
+        </div>
+      </div>
+      <div id="cl-month-controls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div class="m-seg">
+          <div class="m-btn">ม.ค.</div><div class="m-btn">ก.พ.</div><div class="m-btn">มี.ค.</div><div class="m-btn">เม.ย.</div>
+          <div class="m-btn active">พ.ค.</div>
+          <div class="m-btn disabled">มิ.ย.</div><div class="m-btn disabled">ก.ค.</div><div class="m-btn disabled">ส.ค.</div>
+          <div class="m-btn disabled">ก.ย.</div><div class="m-btn disabled">ต.ค.</div><div class="m-btn disabled">พ.ย.</div><div class="m-btn disabled">ธ.ค.</div>
+        </div>
+        <div class="p-info">
+          <span class="cfg-tag" style="background:var(--navy-l);color:var(--navy);">Cap: 01 พ.ค. (F1–F4=45t)</span>
+          <span class="cfg-tag" style="background:var(--amber-l);color:var(--amber);">15 พ.ค. F2=PM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CL Daily View -->
+    <div id="cl-daily" class="content">
+
+      <!-- KPI -->
+      <section class="sec">
+        <div class="z-hdr"><i class="ti ti-award" aria-hidden="true"></i>Zone A — KPI ทั้งวัน (23 พ.ค. 2569)</div>
+        <div class="kpi-g">
+          <div class="kpi-c">
+            <div class="kpi-top"><div class="kpi-ico" style="background:#eff2ff;"><i class="ti ti-building-factory-2" style="color:#1e3a8a;" aria-hidden="true"></i></div><span class="badge b-ok">+2.9%</span></div>
+            <div class="kv">138,917 <span class="ku">kg</span></div>
+            <div class="kl">Cullet ผลิตได้ — 3 เตา 3 กะ</div>
+            <div class="kcmp"><span class="kp">แผน 135,000 kg</span><span class="kd ok">+3,917 kg</span></div>
+            <div class="kbar"><div class="kbf" style="width:100%;background:#16a34a;"></div></div>
+            <div class="knt">F2 หยุด PM — แผนจาก 3 เตา</div>
+          </div>
+          <div class="kpi-c">
+            <div class="kpi-top"><div class="kpi-ico" style="background:#fff7ed;"><i class="ti ti-flame" style="color:#c2410c;" aria-hidden="true"></i></div><span class="badge b-wn">+9.7%</span></div>
+            <div class="kv">23,029 <span class="ku">m³</span></div>
+            <div class="kl">NG รวมทั้งวัน</div>
+            <div class="kcmp"><span class="kp">แผน 21,000 m³</span><span class="kd wn">+2,029 m³</span></div>
+            <div class="kbar"><div class="kbf" style="width:91%;background:#a16207;"></div></div>
+            <div class="knt">VN เฉลี่ย 165.8 m³/ตัน | เป้า ≤ 155</div>
+          </div>
+          <div class="kpi-c">
+            <div class="kpi-top"><div class="kpi-ico" style="background:#f0fdf4;"><i class="ti ti-bolt" style="color:#15803d;" aria-hidden="true"></i></div><span class="badge b-ok">–5.2%</span></div>
+            <div class="kv">2,900 <span class="ku">kWh</span></div>
+            <div class="kl">ไฟฟ้ารวมทั้งวัน</div>
+            <div class="kcmp"><span class="kp">แผน 3,060 kWh</span><span class="kd ok">–160 kWh</span></div>
+            <div class="kbar"><div class="kbf" style="width:85%;background:#16a34a;"></div></div>
+            <div class="knt">20.9 kWh/ตัน</div>
+          </div>
+          <div class="kpi-c">
+            <div class="kpi-top"><div class="kpi-ico" style="background:#fdf2f8;"><i class="ti ti-package" style="color:#9d174d;" aria-hidden="true"></i></div><span class="badge b-ok">–3.1%</span></div>
+            <div class="kv">169,561 <span class="ku">kg</span></div>
+            <div class="kl">RM รวม (Sand + Soda ash)</div>
+            <div class="kcmp"><span class="kp">แผน 175,000 kg</span><span class="kd ok">–5,439 kg</span></div>
+            <div class="kbar"><div class="kbf" style="width:97%;background:#9d174d;"></div></div>
+            <div class="knt">Sand 108,438 | Soda 61,123 kg</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chart Zone B -->
+      <section class="sec">
+        <div class="z-hdr"><i class="ti ti-chart-bar" aria-hidden="true"></i>Zone B — กราฟ Cullet + VN รายกะ</div>
+        <div class="charts-2b">
+          <div class="card">
+            <div class="c-title">Cullet (kg) แต่ละเตา แยกกะ + เส้น VN (m³/ตัน)</div>
+            <div class="c-sub">แกนซ้าย = Cullet (kg) | แกนขวา = VN | เส้นประ = Cap/กะ | VN อยู่เหนือกราฟแท่งเสมอ</div>
+            <div class="leg-row">
+              <div class="leg"><div class="lsq" style="background:#93c5fd;"></div>กะเช้า</div>
+              <div class="leg"><div class="lsq" style="background:#1e3a8a;"></div>กะบ่าย</div>
+              <div class="leg"><div class="lsq" style="background:#16a34a;"></div>กะดึก</div>
+              <div class="leg"><svg width="22" height="10" style="display:block;overflow:visible;"><line x1="0" y1="5" x2="15" y2="5" stroke="#ea580c" stroke-width="2"/><circle cx="19" cy="5" r="3" fill="#ea580c"/></svg>VN</div>
+              <div class="vn-pill">เป้า VN ≤ 155</div>
+            </div>
+            <div class="chart-h-md"><canvas id="clBarChart" role="img" aria-label="Cullet รายกะแต่ละเตา พร้อม VN"></canvas></div>
+            <div id="clAlerts" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;"></div>
+          </div>
+          <div class="card">
+            <div class="c-title">Mole Mix วันนี้</div>
+            <div class="c-sub">CL-2.5 = น้ำเงิน | CL-3.2 = ส้ม</div>
+            <div class="chart-h-sm"><canvas id="clDonut" role="img" aria-label="Mole Mix CL"></canvas></div>
+            <div id="clMoleLegend" style="margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:11px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Zone C: Furnace cards -->
+      <section class="sec">
+        <div class="z-hdr"><i class="ti ti-building-factory-2" aria-hidden="true"></i>Zone C — รายละเอียดแต่ละเตา (รวม 3 กะ)</div>
+        <div class="f-g">
+          <div class="f-card">
+            <div class="f-hdr"><div class="f-name">Furnace 1</div><div class="f-badge fb-run">ผลิตปกติ</div></div>
+            <div class="f-big-row"><span class="f-big">51,702</span><span class="f-bu">kg</span><span class="f-vn">VN: 161.4 m³/ตัน</span></div>
+            <div class="f-vs ok">vs แผน 45,000 kg &nbsp;+6,702 kg ✓</div>
+            <div class="f-pb"><div class="f-pbf" style="width:100%;background:#16a34a;"></div></div>
+            <div class="f-row"><span class="fk">Mole ผลิต</span><span class="fv">2.47 – 2.52</span></div>
+            <div class="f-row"><span class="fk">LOT วันนี้</span><span class="fv">091 / 092 / 093</span></div>
+            <div class="f-div"></div><div class="f-sec">Raw Materials รวม</div>
+            <div class="f-row"><span class="fk">Sand</span><span class="fv">36,480 kg</span></div>
+            <div class="f-row"><span class="fk">Soda ash</span><span class="fv">21,241 kg</span></div>
+            <div class="f-div"></div><div class="f-sec">พลังงานรวม</div>
+            <div class="f-row"><span class="fk">NG</span><span class="fv">8,474 m³</span></div>
+            <div class="f-row"><span class="fk">ไฟฟ้า</span><span class="fv">880 kWh</span></div>
+            <div class="f-row"><span class="fk">น้ำ</span><span class="fv">17 หน่วย</span></div>
+          </div>
+          <div class="f-card" style="opacity:.85;">
+            <div class="f-hdr"><div class="f-name">Furnace 2</div><div class="f-badge fb-stop">หยุด</div></div>
+            <div class="f-stop">
+              <i class="ti ti-tool" aria-hidden="true"></i>
+              <div style="font-size:12px;font-weight:500;">Preventive Maintenance</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:3px;">ทั้งวัน — 3 กะ</div>
+              <div class="f-stop-cap">Cap ที่หายไป<span class="f-cap-n">~45,000 kg/วัน</span></div>
+            </div>
+          </div>
+          <div class="f-card">
+            <div class="f-hdr"><div class="f-name">Furnace 3</div><div class="f-badge fb-run">ผลิตปกติ</div></div>
+            <div class="f-big-row"><span class="f-big">39,728</span><span class="f-bu">kg</span><span class="f-vn">VN: 179.8 m³/ตัน</span></div>
+            <div class="f-vs wn">vs แผน 45,000 kg &nbsp;–5,272 kg</div>
+            <div class="f-pb"><div class="f-pbf" style="width:88%;background:#a16207;"></div></div>
+            <div class="f-row"><span class="fk">Mole ผลิต</span><span class="fv">3.29 – 3.37</span></div>
+            <div class="f-row"><span class="fk">LOT วันนี้</span><span class="fv">104 / 106 / 108</span></div>
+            <div class="f-div"></div><div class="f-sec">Raw Materials รวม</div>
+            <div class="f-row"><span class="fk">Sand</span><span class="fv">32,070 kg</span></div>
+            <div class="f-row"><span class="fk">Soda ash</span><span class="fv">17,889 kg</span></div>
+            <div class="f-div"></div><div class="f-sec">พลังงานรวม</div>
+            <div class="f-row"><span class="fk">NG</span><span class="fv">7,064 m³</span></div>
+            <div class="f-row"><span class="fk">ไฟฟ้า</span><span class="fv">1,000 kWh</span></div>
+            <div class="f-row"><span class="fk">น้ำ</span><span class="fv">10 หน่วย</span></div>
+          </div>
+          <div class="f-card">
+            <div class="f-hdr"><div class="f-name">Furnace 4</div><div class="f-badge fb-run">ผลิตปกติ</div></div>
+            <div class="f-big-row"><span class="f-big">47,487</span><span class="f-bu">kg</span><span class="f-vn">VN: 158.8 m³/ตัน</span></div>
+            <div class="f-vs nv">vs แผน 45,000 kg &nbsp;+2,487 kg ✓</div>
+            <div class="f-pb"><div class="f-pbf" style="width:100%;background:#1e3a8a;"></div></div>
+            <div class="f-row"><span class="fk">Mole ผลิต</span><span class="fv">3.33 – 3.36</span></div>
+            <div class="f-row"><span class="fk">LOT วันนี้</span><span class="fv">105 / 107 / 109</span></div>
+            <div class="f-div"></div><div class="f-sec">Raw Materials รวม</div>
+            <div class="f-row"><span class="fk">Sand</span><span class="fv">34,267 kg</span></div>
+            <div class="f-row"><span class="fk">Soda ash</span><span class="fv">19,993 kg</span></div>
+            <div class="f-div"></div><div class="f-sec">พลังงานรวม</div>
+            <div class="f-row"><span class="fk">NG</span><span class="fv">7,539 m³</span></div>
+            <div class="f-row"><span class="fk">ไฟฟ้า</span><span class="fv">1,020 kWh</span></div>
+            <div class="f-row"><span class="fk">น้ำ</span><span class="fv">11 หน่วย</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Zone D: Shift table -->
+      <section class="sec">
+        <div class="z-hdr"><i class="ti ti-table" aria-hidden="true"></i>Zone D — ตารางสรุปรายกะ</div>
+        <div class="card"><div class="tbl-w"><table>
+          <thead><tr><th>กะ</th><th>เวลา</th><th class="r">F1 (kg)</th><th class="r">F2</th><th class="r">F3 (kg)</th><th class="r">F4 (kg)</th><th class="r">รวม (kg)</th><th class="r">NG (m³)</th><th class="r">ไฟ (kWh)</th></tr></thead>
+          <tbody>
+            <tr><td>กะเช้า</td><td style="color:var(--text3);">06:30–14:30</td><td class="r">14,416</td><td class="r" style="color:var(--text3);">PM</td><td class="r">12,139</td><td class="r">15,455</td><td class="r ok" style="font-weight:500;">41,010</td><td class="r">7,712</td><td class="r">940</td></tr>
+            <tr><td>กะบ่าย</td><td style="color:var(--text3);">14:30–22:30</td><td class="r">19,248</td><td class="r" style="color:var(--text3);">PM</td><td class="r">14,348</td><td class="r">16,574</td><td class="r ok" style="font-weight:500;">50,170</td><td class="r">7,670</td><td class="r">930</td></tr>
+            <tr><td>กะดึก</td><td style="color:var(--text3);">22:30–06:30</td><td class="r">18,038</td><td class="r" style="color:var(--text3);">PM</td><td class="r">13,241</td><td class="r">15,458</td><td class="r ok" style="font-weight:500;">46,737</td><td class="r">7,647</td><td class="r">1,030</td></tr>
+            <tr class="tr-tot"><td colspan="2">รวมทั้งวัน</td><td class="r ok">51,702</td><td class="r" style="color:var(--text3);">—</td><td class="r wn">39,728</td><td class="r nv">47,487</td><td class="r nv" style="font-size:13px;">138,917</td><td class="r">23,029</td><td class="r">2,900</td></tr>
+          </tbody>
+        </table></div></div>
+      </section>
+
+      <!-- Zone E: Summary -->
+      <section class="sec">
+        <div class="z-hdr"><i class="ti ti-list-details" aria-hidden="true"></i>Zone E — สรุป RM และพลังงานรวม</div>
+        <div class="sum-g">
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;"><i class="ti ti-package" style="font-size:15px;color:var(--navy);" aria-hidden="true"></i><span style="font-size:12px;font-weight:500;">Raw Materials รวมทั้งวัน</span></div>
+            <div class="f-row"><span class="fk">Sand รวม</span><span class="fv">108,438 kg</span></div>
+            <div class="f-div"></div>
+            <div class="f-row"><span class="fk">Soda ash รวม</span><span class="fv">61,123 kg</span></div>
+            <div class="f-div"></div>
+            <div class="f-row"><span class="fk" style="font-weight:500;">RM รวมทั้งหมด</span><span class="fv nv" style="font-size:13px;">169,561 kg</span></div>
+          </div>
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;"><i class="ti ti-bolt" style="font-size:15px;color:var(--navy);" aria-hidden="true"></i><span style="font-size:12px;font-weight:500;">พลังงานรวม + Intensity</span></div>
+            <div class="f-row"><span class="fk">NG รวม</span><span class="fv">23,029 m³</span></div>
+            <div class="f-div"></div>
+            <div class="f-row"><span class="fk">VN เฉลี่ย</span><span class="fv wn">165.8 m³/ตัน</span></div>
+            <div class="f-div"></div>
+            <div class="f-row"><span class="fk">ไฟฟ้ารวม</span><span class="fv">2,900 kWh</span></div>
+            <div class="f-div"></div>
+            <div class="f-row"><span class="fk">ไฟ / ตัน</span><span class="fv ok">20.9 kWh/ตัน</span></div>
+            <div class="f-div"></div>
+            <div class="f-row"><span class="fk">น้ำหล่อเย็น</span><span class="fv">39 หน่วย</span></div>
+          </div>
+        </div>
+      </section>
+    </div><!-- /cl-daily -->
+
+    <!-- CL Monthly View -->
+    <div id="cl-monthly" style="display:none;" class="content">
+      <section class="sec">
+        <div class="z-hdr"><i class="ti ti-award" aria-hidden="true"></i>Zone A — KPI สรุปรวมเดือน (1–23 พ.ค. 2569)</div>
+        <div class="kpi-g">
+          <div class="kpi-c"><div class="kpi-top"><div class="kpi-ico" style="background:#eff2ff;"><i class="ti ti-building-factory-2" style="color:#1e3a8a;" aria-hidden="true"></i></div><span class="badge b-ok">+1.8%</span></div><div class="kv">3,195 <span class="ku">ตัน</span></div><div class="kl">Cullet รวม (23 วัน)</div><div class="kcmp"><span class="kp">แผน 3,139 ตัน</span><span class="kd ok">+56 ตัน</span></div><div class="kbar"><div class="kbf" style="width:100%;background:#16a34a;"></div></div><div class="knt">เฉลี่ย 138.9 ตัน/วัน | F2 หยุด 9 วัน</div></div>
+          <div class="kpi-c"><div class="kpi-top"><div class="kpi-ico" style="background:#fff7ed;"><i class="ti ti-flame" style="color:#c2410c;" aria-hidden="true"></i></div><span class="badge b-wn">+6.2%</span></div><div class="kv">529,667 <span class="ku">m³</span></div><div class="kl">NG รวม (23 วัน)</div><div class="kcmp"><span class="kp">แผน 483,000 m³</span><span class="kd wn">+46,667 m³</span></div><div class="kbar"><div class="kbf" style="width:91%;background:#a16207;"></div></div><div class="knt">VN เฉลี่ย 165.8 m³/ตัน</div></div>
+          <div class="kpi-c"><div class="kpi-top"><div class="kpi-ico" style="background:#f0fdf4;"><i class="ti ti-bolt" style="color:#15803d;" aria-hidden="true"></i></div><span class="badge b-ok">–4.1%</span></div><div class="kv">66,700 <span class="ku">kWh</span></div><div class="kl">ไฟฟ้ารวม (23 วัน)</div><div class="kcmp"><span class="kp">แผน 69,575 kWh</span><span class="kd ok">–2,875 kWh</span></div><div class="kbar"><div class="kbf" style="width:86%;background:#16a34a;"></div></div><div class="knt">20.9 kWh/ตัน เฉลี่ย</div></div>
+          <div class="kpi-c"><div class="kpi-top"><div class="kpi-ico" style="background:#fdf2f8;"><i class="ti ti-tool" style="color:#9d174d;" aria-hidden="true"></i></div><span class="badge b-wn">F2</span></div><div class="kv">9 <span class="ku">วัน</span></div><div class="kl">Downtime รวม (F2 PM)</div><div class="kcmp"><span class="kp">Cap สูญเสีย ~405 ตัน</span><span class="kd wn">–12.7%</span></div><div class="kbar"><div class="kbf" style="width:39%;background:#a16207;"></div></div><div class="knt">F1/F3/F4 ชดเชยได้บางส่วน</div></div>
+        </div>
+      </section>
+      <section class="sec">
+        <div class="z-hdr"><i class="ti ti-chart-bar" aria-hidden="true"></i>Zone B — Trend รายวันตลอดเดือน</div>
+        <div class="charts-2b">
+          <div class="card">
+            <div class="c-title">Cullet ผลิตได้รายวัน แยกเตา (ตัน)</div>
+            <div class="c-sub">แท่งซ้อน F1/F3/F4 | เส้นประ = Target 135 ตัน/วัน | พื้นที่เทา = F2 PM (15–23 พ.ค.)</div>
+            <div class="leg-row">
+              <div class="leg"><div class="lsq" style="background:#2563eb;"></div>F1 (CL-2.5)</div>
+              <div class="leg"><div class="lsq" style="background:#ea580c;"></div>F3 (CL-3.2)</div>
+              <div class="leg"><div class="lsq" style="background:#16a34a;"></div>F4 (CL-3.2)</div>
+              <div class="leg"><svg width="20" height="10" style="display:block;"><line x1="0" y1="5" x2="20" y2="5" stroke="#1e3a8a" stroke-width="1.5" stroke-dasharray="4,2"/></svg>Target</div>
+            </div>
+            <div class="chart-h-md"><canvas id="clMonthBar" role="img" aria-label="Cullet รายวันรายเดือน"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="c-title">VN รายวันแต่ละเตา (m³/ตัน)</div>
+            <div class="c-sub">F1 / F3 / F4 | เส้นประส้ม = เป้า 155 m³/ตัน</div>
+            <div class="leg-row">
+              <div class="leg"><div class="lsq" style="background:#2563eb;border-radius:50%;"></div>F1</div>
+              <div class="leg"><div class="lsq" style="background:#ea580c;border-radius:50%;"></div>F3</div>
+              <div class="leg"><div class="lsq" style="background:#16a34a;border-radius:50%;"></div>F4</div>
+            </div>
+            <div class="chart-h-md"><canvas id="clVnDaily" role="img" aria-label="VN รายวัน"></canvas></div>
+          </div>
+        </div>
+      </section>
+      <section class="sec">
+        <div class="z-hdr"><i class="ti ti-table" aria-hidden="true"></i>Zone C — ตารางสรุปรายสัปดาห์</div>
+        <div class="card"><div class="tbl-w"><table>
+          <thead><tr><th>รายการ</th><th class="r">สัปดาห์ 1<br/><span style="font-weight:400;font-size:10px;color:#9ba3b2;">1–7 พ.ค.</span></th><th class="r">สัปดาห์ 2<br/><span style="font-weight:400;font-size:10px;color:#9ba3b2;">8–14 พ.ค.</span></th><th class="r" style="background:#fffbf0;">สัปดาห์ 3<br/><span style="font-weight:400;font-size:10px;color:#9ba3b2;">15–21 พ.ค.</span></th><th class="r">ปัจจุบัน<br/><span style="font-weight:400;font-size:10px;color:#9ba3b2;">22–23 พ.ค.</span></th><th class="r" style="background:#f0f4ff;">รวมเดือน</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500;">Cullet รวม (ตัน)</td><td class="r">966</td><td class="r">980</td><td class="r" style="background:#fffbf0;">973</td><td class="r">276</td><td class="r nv" style="background:#f0f4ff;font-size:13px;">3,195</td></tr>
+            <tr><td style="color:var(--text3);">vs เป้า</td><td class="r"><span class="chip cok">+21t</span></td><td class="r"><span class="chip cok">+35t</span></td><td class="r" style="background:#fffbf0;"><span class="chip cwn">–28t</span></td><td class="r"><span class="chip cok">+28t</span></td><td class="r" style="background:#f0f4ff;"><span class="chip cok">+56t</span></td></tr>
+            <tr><td style="color:#2563eb;padding-left:18px;">F1 (CL-2.5)</td><td class="r">357</td><td class="r">362</td><td class="r" style="background:#fffbf0;">342</td><td class="r">103</td><td class="r" style="background:#f0f4ff;color:#2563eb;font-weight:500;">1,164</td></tr>
+            <tr><td style="color:#a16207;padding-left:18px;">F2 (PM)</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="background:#fffbf0;color:#a16207;">9 วัน</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="background:#f0f4ff;color:#a16207;font-weight:500;">9 วัน</td></tr>
+            <tr><td style="color:#ea580c;padding-left:18px;">F3 (CL-3.2)</td><td class="r">280</td><td class="r">285</td><td class="r" style="background:#fffbf0;">272</td><td class="r">80</td><td class="r" style="background:#f0f4ff;color:#ea580c;font-weight:500;">917</td></tr>
+            <tr><td style="color:#16a34a;padding-left:18px;">F4 (CL-3.2)</td><td class="r">329</td><td class="r">333</td><td class="r" style="background:#fffbf0;">321</td><td class="r">93</td><td class="r" style="background:#f0f4ff;color:#16a34a;font-weight:500;">1,076</td></tr>
+            <tr style="border-top:1px solid var(--border-s);"><td style="font-weight:500;">VN F1 เฉลี่ย</td><td class="r">162</td><td class="r">158</td><td class="r" style="background:#fffbf0;color:#a16207;">165</td><td class="r">162</td><td class="r" style="background:#f0f4ff;color:#a16207;">162</td></tr>
+            <tr><td style="font-weight:500;">VN F3 เฉลี่ย</td><td class="r" style="color:#b91c1c;">178</td><td class="r" style="color:#b91c1c;">170</td><td class="r" style="background:#fffbf0;color:#b91c1c;">182</td><td class="r" style="color:#b91c1c;">180</td><td class="r" style="background:#f0f4ff;color:#b91c1c;font-weight:500;">178 ⚠️</td></tr>
+            <tr><td style="font-weight:500;">VN F4 เฉลี่ย</td><td class="r ok">160</td><td class="r ok">155</td><td class="r" style="background:#fffbf0;color:#a16207;">162</td><td class="r" style="color:#a16207;">163</td><td class="r" style="background:#f0f4ff;color:#a16207;">160</td></tr>
+          </tbody>
+        </table></div></div>
+      </section>
+      <section class="sec">
+        <div class="z-hdr"><i class="ti ti-bulb" aria-hidden="true"></i>Zone D — Insight อัตโนมัติ</div>
+        <div class="ins-g">
+          <div class="ins ins-bd"><div class="ins-hd"><i class="ti ti-alert-triangle" aria-hidden="true"></i>F3 VN สูงทุกสัปดาห์</div><div class="ins-body">VN เฉลี่ย 178 m³/ตัน สูงกว่าเป้า 155 ทุกสัปดาห์ โดยเฉพาะสัปดาห์ 3 VN=182</div></div>
+          <div class="ins ins-wn"><div class="ins-hd"><i class="ti ti-tool" aria-hidden="true"></i>F2 หยุด 9 วัน สูญเสีย ~405 ตัน</div><div class="ins-body">F2 PM ตั้งแต่ 15 พ.ค. ผลรวมสัปดาห์ 3 ต่ำกว่าเป้า 28 ตัน แต่ภาพรวมเดือนยังบวก</div></div>
+          <div class="ins ins-ok"><div class="ins-hd"><i class="ti ti-check" aria-hidden="true"></i>F4 VN สัปดาห์ 2 ถึงเป้า</div><div class="ins-body">F4 VN=155 m³/ตัน ในสัปดาห์ 2 — ใช้เป็น benchmark สำหรับ F1 และ F3</div></div>
+        </div>
+      </section>
+    </div><!-- /cl-monthly -->
+  </div><!-- /cl-section -->
+
+  <!-- ═══ SL SECTION ═══ -->
+  <div id="sl-section" style="display:none;">
+    <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="p-lbl">เดือน:</span>
+      <div class="m-seg">
+        <div class="m-btn">ม.ค.</div><div class="m-btn">ก.พ.</div><div class="m-btn">มี.ค.</div><div class="m-btn">เม.ย.</div>
+        <div class="m-btn active" style="background:var(--teal);border-color:var(--teal);">พ.ค.</div>
+        <div class="m-btn disabled">มิ.ย.</div><div class="m-btn disabled">ก.ค.</div><div class="m-btn disabled">ส.ค.</div>
+        <div class="m-btn disabled">ก.ย.</div><div class="m-btn disabled">ต.ค.</div><div class="m-btn disabled">พ.ย.</div><div class="m-btn disabled">ธ.ค.</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Freshness -->
+      <div class="fresh-bar">
+        <i class="ti ti-alert-triangle" style="font-size:17px;color:var(--amber);" aria-hidden="true"></i>
+        <div class="fresh-text"><strong>ข้อมูลอัปเดตล่าสุด: 14 พ.ค. 2569</strong> — ล่าช้า 11 วัน กรุณาติดต่อฝ่ายผลิต ATC</div>
+        <span class="fresh-days">⏰ ล่าช้า 11 วัน</span>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar" id="slFilterBar">
+        <i class="ti ti-filter" style="font-size:13px;color:var(--navy);" aria-hidden="true"></i>
+        <span style="font-size:11px;color:var(--navy);font-weight:500;">กรองตาม:</span>
+        <div id="slFilterTags"></div>
+        <div class="f-reset" onclick="slReset()"><i class="ti ti-x" style="font-size:11px;" aria-hidden="true"></i>ล้างตัวกรอง</div>
+      </div>
+
+      <!-- KPI -->
+      <section class="sec">
+        <div class="z-hdr teal"><i class="ti ti-award" aria-hidden="true"></i>Zone A — KPI <span id="slKpiLabel" style="margin-left:4px;color:var(--teal);">ทั้งเดือน พ.ค. (14 วัน)</span></div>
+        <div class="kpi-g">
+          <div class="kpi-c"><div class="kpi-top"><div class="kpi-ico" style="background:#ecfeff;"><i class="ti ti-droplet" style="color:#0e7490;" aria-hidden="true"></i></div><span class="badge b-teal" id="slKpiBadge">14 วัน</span></div><div class="kv" id="slKpiSlVal">2,655,535 <span class="ku">kg</span></div><div class="kl">SL ผลิตได้รวม</div><div class="kcmp"><span class="kp" id="slKpiSlSub">SL-2.5: 2,228k | SL-3.2: 428k</span><span class="kd tc" id="slKpiSlPct">83.9% / 16.1%</span></div><div class="kbar"><div class="kbf" style="width:59%;background:#0e7490;" id="slKpiSlBar"></div></div></div>
+          <div class="kpi-c"><div class="kpi-top"><div class="kpi-ico" style="background:#eff2ff;"><i class="ti ti-hash" style="color:#1e3a8a;" aria-hidden="true"></i></div><span class="badge b-info" id="slKpiBatchBadge">รวม</span></div><div class="kv" id="slKpiBatchVal">248 <span class="ku">batch</span></div><div class="kl">จำนวน Batch</div><div class="kcmp"><span class="kp">เฉลี่ย/วัน</span><span class="kd tc" id="slKpiBatchAvg">17.7 batch/วัน</span></div><div class="kbar"><div class="kbf" style="width:74%;background:#1e3a8a;"></div></div></div>
+          <div class="kpi-c"><div class="kpi-top"><div class="kpi-ico" style="background:#fff7ed;"><i class="ti ti-cube" style="color:#c2410c;" aria-hidden="true"></i></div><span class="badge b-ok">Cullet</span></div><div class="kv" id="slKpiClVal">1,153,018 <span class="ku">kg</span></div><div class="kl">Cullet ใช้รวม</div><div class="kcmp"><span class="kp">CL-2.5: 981k</span><span class="kd" style="color:#ea580c;" id="slKpiClSub">CL-3.2: 172k</span></div><div class="kbar"><div class="kbf" style="width:85%;background:#ea580c;"></div></div></div>
+          <div class="kpi-c"><div class="kpi-top"><div class="kpi-ico" style="background:#f0fdf4;"><i class="ti ti-building" style="color:#15803d;" aria-hidden="true"></i></div><span class="badge b-ok" id="slKpiTankBadge">Tank</span></div><div class="kv" id="slKpiTankTop">SL-01 <span class="ku">มากสุด</span></div><div class="kl">Tank ที่รับ SL มากสุด</div><div class="kcmp"><span class="kp" id="slKpiTankSub">851k kg</span><span class="kd ok" id="slKpiTankPct">32.0%</span></div><div class="kbar"><div class="kbf" style="width:32%;background:#16a34a;" id="slKpiTankBar"></div></div></div>
+        </div>
+      </section>
+
+      <!-- Charts -->
+      <section class="sec">
+        <div class="z-hdr teal"><i class="ti ti-chart-bar" aria-hidden="true"></i>Zone B — กราฟ <span id="slChartLabel" style="margin-left:4px;color:var(--teal);font-style:italic;text-transform:none;letter-spacing:0;font-size:11px;">คลิกแท่งวันหรือถังเพื่อ filter ทุก section</span></div>
+        <div class="charts-2">
+          <div class="card">
+            <div class="c-title">SL ผลิตรายวัน (kg) — แยก SL-2.5 / SL-3.2</div>
+            <div class="click-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>คลิกแท่งวันใดเพื่อ filter ทุก section | คลิกซ้ำเพื่อยกเลิก</div>
+            <div class="leg-row">
+              <div class="leg"><div class="lsq" style="background:#2563eb;"></div>SL-2.5</div>
+              <div class="leg"><div class="lsq" style="background:#ea580c;"></div>SL-3.2</div>
+              <div class="leg"><svg width="22" height="10" style="display:block;"><line x1="0" y1="5" x2="15" y2="5" stroke="#1e3a8a" stroke-width="1.5"/><circle cx="19" cy="5" r="3" fill="#1e3a8a"/></svg>Batch</div>
+            </div>
+            <div class="chart-h"><canvas id="slBarChart" role="img" aria-label="SL รายวัน"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="c-title" id="slDonutTitle">Type SL — ทั้งเดือน</div>
+            <div class="c-sub">คลิกเพื่อดูเฉพาะช่วงที่เลือก</div>
+            <div class="chart-h-sm"><canvas id="slDonutChart" role="img" aria-label="Type SL Donut"></canvas></div>
+            <div id="slTypeLegend"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="c-title">SL แยกตาม Tank No. (kg)</div>
+          <div class="click-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>คลิกถังเพื่อดูวันที่ส่งเข้าถังนั้น | คลิกซ้ำเพื่อยกเลิก</div>
+          <div class="chart-h-lg"><canvas id="slTankChart" role="img" aria-label="SL แยก Tank"></canvas></div>
+        </div>
+      </section>
+
+      <!-- Table Zone C -->
+      <section class="sec">
+        <div class="z-hdr teal"><i class="ti ti-table" aria-hidden="true"></i>Zone C — <span id="slTableTitle">ตารางสรุปทั้งเดือน</span></div>
+        <div class="card"><div class="tbl-w"><table>
+          <thead><tr><th style="min-width:150px;">รายการ</th><th class="r">สัปดาห์ 1<br/><span style="font-weight:400;font-size:10px;color:#9ba3b2;">1–7 พ.ค.</span></th><th class="r">สัปดาห์ 2<br/><span style="font-weight:400;font-size:10px;color:#9ba3b2;">8–14 พ.ค.</span></th><th class="r" style="color:#9ba3b2;background:#fafafa;">สัปดาห์ 3<br/><span style="font-weight:400;font-size:10px;">15–21 พ.ค.</span></th><th class="r" style="color:#9ba3b2;background:#fafafa;">สัปดาห์ 4<br/><span style="font-weight:400;font-size:10px;">22–31 พ.ค.</span></th><th class="r" style="background:#f0f9ff;">รวมเดือน</th></tr></thead>
+          <tbody>
+            <tr class="tr-sec"><td style="color:#0e7490;">SL ผลิตได้รวม (kg)</td><td class="r">1,185,107</td><td class="r">1,470,428</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:#0e7490;font-size:13px;background:#f0f9ff;">2,655,535</td></tr>
+            <tr class="tr-sub"><td style="color:#2563eb;">— SL-2.5</td><td class="r" style="color:#2563eb;">985,474</td><td class="r" style="color:#2563eb;">1,242,104</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:#2563eb;font-weight:500;background:#f0f9ff;">2,227,578</td></tr>
+            <tr class="tr-sub"><td style="color:#ea580c;">— SL-3.2</td><td class="r" style="color:#ea580c;">199,633</td><td class="r" style="color:#ea580c;">228,324</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:#ea580c;font-weight:500;background:#f0f9ff;">427,957</td></tr>
+            <tr><td style="color:var(--text3);">Batch รวม</td><td class="r">108</td><td class="r">135</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="font-weight:500;color:var(--navy);background:#f0f9ff;">248</td></tr>
+            <tr class="tr-sec" style="border-top:1px solid var(--border-s);"><td>Cullet (Raw Material)</td><td class="r">512,930</td><td class="r">640,288</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="font-weight:500;background:#f0f9ff;">1,153,218</td></tr>
+            <tr class="tr-sub"><td style="color:#2563eb;">— CL-2.5</td><td class="r" style="color:#2563eb;">442,310</td><td class="r" style="color:#2563eb;">538,506</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:#2563eb;font-weight:500;background:#f0f9ff;">980,816</td></tr>
+            <tr class="tr-sub"><td style="color:#ea580c;">— CL-3.2</td><td class="r" style="color:#ea580c;">70,620</td><td class="r" style="color:#ea580c;">101,582</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:#ea580c;font-weight:500;background:#f0f9ff;">172,202</td></tr>
+            <tr class="tr-sec" style="border-top:1px solid var(--border-s);"><td>น้ำ (Water) รวม</td><td class="r">524,438</td><td class="r">658,824</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="font-weight:500;background:#f0f9ff;">1,183,262</td></tr>
+            <tr class="tr-sub"><td style="color:var(--text2);">— Water-FW</td><td class="r">179,658</td><td class="r">229,770</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="background:#f0f9ff;">409,428</td></tr>
+            <tr class="tr-sub"><td style="color:var(--text2);">— Water-RW</td><td class="r">245,105</td><td class="r">250,528</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="background:#f0f9ff;">495,633</td></tr>
+            <tr class="tr-sub"><td style="color:var(--text2);">— Water-CW</td><td class="r">101,781</td><td class="r">180,280</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="background:#f0f9ff;">282,061</td></tr>
+            <tr class="tr-sub"><td style="color:var(--text2);">— FW ปรับ</td><td class="r">97,019</td><td class="r">124,924</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="background:#f0f9ff;">221,943</td></tr>
+            <tr class="tr-sec" style="border-top:1px solid var(--border-s);"><td>สารเคมี & พลังงาน</td><td></td><td></td><td></td><td></td><td style="background:#f0f9ff;"></td></tr>
+            <tr class="tr-sub"><td style="color:var(--text2);">— CS50</td><td class="r">6,317</td><td class="r">18,862</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="background:#f0f9ff;">25,179</td></tr>
+            <tr class="tr-sub"><td style="color:var(--text2);">— Steam</td><td class="r">108,169</td><td class="r">146,528</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="color:var(--text3);">—</td><td class="r" style="background:#f0f9ff;">254,697</td></tr>
+          </tbody>
+        </table></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--amber);background:var(--amber-l);border-radius:var(--r);padding:7px 12px;display:flex;align-items:center;gap:5px;">
+          <i class="ti ti-alert-circle" style="font-size:13px;" aria-hidden="true"></i>สัปดาห์ 3–4 ยังไม่มีข้อมูล เนื่องจากอัปเดตล่าสุดถึง 14 พ.ค. เท่านั้น
+        </div>
+        </div>
+      </section>
+    </div><!-- /sl content -->
+  </div><!-- /sl-section -->
+</div><!-- /page-production -->
+
+<!-- ══ OTHER PAGES (placeholder) ══ -->
+<div class="page" id="page-overview"><div class="content"><div class="card" style="padding:40px;text-align:center;color:var(--text3);"><i class="ti ti-layout-dashboard" style="font-size:40px;display:block;margin-bottom:12px;" aria-hidden="true"></i>หน้า Overview — อยู่ระหว่างพัฒนา</div></div></div>
+<div class="page" id="page-sales">
+<div id="s-tt"></div>
+
+<!-- Sales Filter Strip -->
+<div class="fstrip" id="s-fs">
+  <i class="ti ti-calendar-stats" style="font-size:15px;color:var(--navy);" aria-hidden="true"></i>
+  <span class="fl">ช่วงเวลา</span>
+  <div class="s-seg">
+    <div class="mp active" onclick="sSetM(0)">ทั้งหมด</div>
+    <div class="mp" onclick="sSetM(1)">ม.ค.</div>
+    <div class="mp" onclick="sSetM(2)">ก.พ.</div>
+    <div class="mp" onclick="sSetM(3)">มี.ค.</div>
+    <div class="mp" onclick="sSetM(4)">เม.ย.</div>
+    <div class="mp partial" onclick="sSetM(5)">พ.ค.</div>
+  </div>
+  <div class="s-sep"></div>
+  <i class="ti ti-tag" style="font-size:15px;color:var(--text3);" aria-hidden="true"></i>
+  <span class="fl">สินค้า</span>
+  <div style="display:flex;gap:6px;">
+    <div class="gp gp-cl active" onclick="sTogGrp('CL')">CL Cullet</div>
+    <div class="gp gp-sl2 active" onclick="sTogGrp('SL-2.x')">SL-2.x</div>
+    <div class="gp gp-sl3 active" onclick="sTogGrp('SL-3.x')">SL-3.x</div>
+  </div>
+  <div class="rst" id="s-rstBtn" onclick="sResetAll()">↺ Reset</div>
+</div>
+
+<div class="s-content">
+
+<!-- ZONE A -->
+<section>
+  <div class="zh"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Zone A — KPI <span class="zh-lbl" id="s-kpiLbl">ทั้งหมด ม.ค.–พ.ค. 2569</span></div>
+  <div class="s-kpi-g">
+    <div class="s-kpi skc1"><span class="s-kpi-cmp" id="s-kc1" style="display:none;"></span><div class="s-kpi-lbl">ยอดขายสุทธิ (ล้านบาท)</div><div class="s-kpi-val" id="s-kv1">273.94</div><div class="s-kpi-sub" id="s-ks1">รวม 5 เดือน</div></div>
+    <div class="s-kpi skc2"><span class="s-kpi-cmp" id="s-kc2" style="display:none;"></span><div class="s-kpi-lbl">ปริมาณขาย (ตัน)</div><div class="s-kpi-val" id="s-kv2">38,653</div><div class="s-kpi-sub" id="s-ks2">รวม 5 เดือน</div></div>
+    <div class="s-kpi skc3"><span class="s-kpi-cmp" id="s-kc3" style="display:none;"></span><div class="s-kpi-lbl">จำนวน Invoice</div><div class="s-kpi-val" id="s-kv3">1,385</div><div class="s-kpi-sub" id="s-ks3">รวม 5 เดือน</div></div>
+    <div class="s-kpi skc4"><span class="s-kpi-cmp" id="s-kc4" style="display:none;"></span><div class="s-kpi-lbl">ลูกค้า (รายที่ active)</div><div class="s-kpi-val" id="s-kv4">61</div><div class="s-kpi-sub" id="s-ks4">ลูกค้าที่ active</div></div>
+  </div>
+</section>
+
+<!-- ZONE B -->
+<section>
+  <div class="zh"><i class="ti ti-chart-bar" aria-hidden="true"></i>Zone B — ยอดขาย + ลูกค้าหลัก <span class="zh-lbl" id="s-zbLbl"></span></div>
+  <div class="s-card">
+    <div class="s-zb-grid">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+          <span class="s-ct" id="s-mainTitle">ยอดขายสุทธิรายเดือน แยกกลุ่มสินค้า (M฿)</span>
+          <div class="s-leg-row" style="margin:0;">
+            <div class="s-leg"><div class="s-lsq" style="background:#1a56db;"></div>SL-2.x</div>
+            <div class="s-leg"><div class="s-lsq" style="background:#0d7a4a;"></div>SL-3.x</div>
+            <div class="s-leg"><div class="s-lsq" style="background:#ea580c;"></div>CL</div>
+          </div>
+        </div>
+        <div class="s-cs" id="s-mainSub">คลิกแท่งเดือนเพื่อเลือก · คลิกซ้ำเพื่อยกเลิก</div>
+        <div class="s-chart-main"><canvas id="s-mainChart"></canvas></div>
+        <div class="s-sub4">
+          <div class="s-sub-card" style="display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+              <span class="s-ct" style="font-size:10.5px;">รายได้ต่อ Type (M฿)</span>
+              <div style="display:flex;gap:4px;font-size:9px;">
+                <span style="color:#1a56db;">■ SL-2</span>
+                <span style="color:#0d7a4a;">■ SL-3</span>
+                <span style="color:#ea580c;">■ CL</span>
+              </div>
+            </div>
+            <div style="flex:1;min-height:70px;position:relative;"><canvas id="s-typeRevLine"></canvas></div>
+          </div>
+          <div class="s-sub-card" style="display:flex;flex-direction:column;">
+            <div class="s-ct" style="font-size:10.5px;margin-bottom:1px;">สัดส่วนสินค้า</div>
+            <div class="s-cs" id="s-donutSub">ยอดขาย ฿ รวม</div>
+            <div style="flex:1;min-height:70px;position:relative;"><canvas id="s-prodShareBar"></canvas></div>
+          </div>
+          <div class="s-sub-card" style="display:flex;flex-direction:column;">
+            <div class="s-ct" style="font-size:10.5px;margin-bottom:1px;">Concentration Risk</div>
+            <div class="s-cs">Top 2 ลูกค้าหลัก</div>
+            <div style="display:flex;align-items:center;gap:8px;flex:1;">
+              <div style="position:relative;width:64px;height:64px;flex-shrink:0;">
+                <canvas id="s-concDonut" width="64" height="64"></canvas>
+                <div class="s-conc-abs">
+                  <div style="font-size:13px;font-weight:600;font-family:'IBM Plex Mono',monospace;color:#b91c1c;" id="s-concPct">72%</div>
+                  <div style="font-size:8px;color:var(--text3);">Top 2</div>
+                </div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div class="conc-names" id="s-concNames" style="font-size:9.5px;"></div>
+                <div class="risk-track" style="margin-top:5px;"><div class="risk-needle" id="s-riskNeedle" style="left:72%;"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:8.5px;color:var(--text3);margin-top:2px;"><span>ต่ำ</span><span style="color:#b91c1c;">สูง</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="s-sub-card" style="display:flex;flex-direction:column;">
+            <div class="s-ct" style="font-size:10.5px;margin-bottom:1px;">Mix สินค้าลูกค้า</div>
+            <div class="s-cs" id="s-mixSub">ภาพรวมทั้งหมด</div>
+            <div style="display:flex;align-items:center;gap:8px;flex:1;">
+              <div style="width:56px;height:56px;flex-shrink:0;position:relative;"><canvas id="s-custMixDonut"></canvas></div>
+              <div style="flex:1;font-size:10px;" id="s-mixLegend"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="border-left:1px solid var(--border);padding-left:12px;">
+        <div class="s-ct" style="margin-bottom:2px;">Top ลูกค้า — ยอดขายสุทธิ</div>
+        <div class="s-cs" id="s-custSubLbl">คลิกชื่อลูกค้าเพื่อ filter</div>
+        <div class="s-cust-list" id="s-custList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ZONE C -->
+<section>
+  <div class="zh"><i class="ti ti-package" aria-hidden="true"></i>Zone C — รายละเอียดสินค้า <span class="zh-lbl" id="s-zoneCLbl"></span></div>
+  <div class="s-zc-grid">
+    <div class="s-card">
+      <div class="s-ct" style="margin-bottom:1px;">รายการสินค้า — ยอดขาย / ปริมาณ / ราคา</div>
+      <div class="s-cs" id="s-prodSub">คลิกสินค้าเพื่อ filter Zone B ลูกค้า</div>
+      <div style="overflow-x:auto;">
+        <table class="prod-table">
+          <thead><tr>
+            <th>รหัส</th><th>ชื่อสินค้า</th><th>กลุ่ม</th>
+            <th class="r">M฿</th><th class="r">ตัน</th><th class="r">฿/kg</th>
+          </tr></thead>
+          <tbody id="s-prodBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="s-card">
+      <div class="s-ct" style="margin-bottom:1px;">CL Cullet — แยกตามเตา</div>
+      <div class="s-cs">F=เตา1 · G=เตา3 · H=เตา4</div>
+      <div class="furn-g" id="s-furnCards"></div>
+      <div style="margin-top:8px;height:70px;position:relative;"><canvas id="s-furnBar"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ZONE D -->
+<section>
+  <div class="zh"><i class="ti ti-file-invoice" aria-hidden="true"></i>Zone D — AR / บิลค้างชำระ</div>
+  <div class="s-card">
+    <div class="ar-g">
+      <div class="ar-card ar-paid"><div class="ar-hd s-paid"><i class="ti ti-circle-check" aria-hidden="true"></i>ชำระแล้ว</div><div class="ar-val s-paid">฿185.7M</div><div class="ar-ct">850 รายการ</div></div>
+      <div class="ar-card ar-warn"><div class="ar-hd s-warn"><i class="ti ti-clock" aria-hidden="true"></i>ใกล้ครบกำหนด</div><div class="ar-val s-warn">฿52.3M</div><div class="ar-ct">ครบใน 7 วัน</div></div>
+      <div class="ar-card ar-over"><div class="ar-hd s-over"><i class="ti ti-alert-triangle" aria-hidden="true"></i>เกินกำหนด</div><div class="ar-val s-over">฿35.9M</div><div class="ar-ct">รายการค้างชำระ</div></div>
+    </div>
+    <table class="od-table"><thead><tr><th>ลูกค้า</th><th>สถานะ</th><th class="r">ยอด (฿)</th><th class="r">Invoice</th></tr></thead><tbody id="s-odBody"></tbody></table>
+  </div>
+</section>
+
+</div><!-- /s-content -->
+</div><!-- /page-sales -->
+<div class="page" id="page-wms"><div class="content"><div class="card" style="padding:40px;text-align:center;color:var(--text3);"><i class="ti ti-box" style="font-size:40px;display:block;margin-bottom:12px;" aria-hidden="true"></i>หน้าคลังสินค้า — อยู่ระหว่างพัฒนา</div></div></div>
+<div class="page" id="page-transport"><div class="content"><div class="card" style="padding:40px;text-align:center;color:var(--text3);"><i class="ti ti-truck" style="font-size:40px;display:block;margin-bottom:12px;" aria-hidden="true"></i>หน้าขนส่ง — อยู่ระหว่างพัฒนา</div></div></div>
+<div class="page" id="page-energy"><div class="content"><div class="card" style="padding:40px;text-align:center;color:var(--text3);"><i class="ti ti-bolt" style="font-size:40px;display:block;margin-bottom:12px;" aria-hidden="true"></i>หน้าพลังงาน — อยู่ระหว่างพัฒนา</div></div></div>
+<div class="page" id="page-config">
+
+  <!-- Config sub-tabs -->
+  <div class="prod-tabs" style="background:var(--surface);border-bottom:2px solid var(--border);padding:0 24px;display:flex;">
+    <div class="ptab active-cl" id="cfg-tab-furnace" onclick="switchCfgTab('furnace')" style="cursor:pointer;">
+      <i class="ti ti-building-factory-2" style="font-size:14px;margin-right:5px;" aria-hidden="true"></i>Furnace / Plan
+      <span class="ptab-badge" style="background:var(--navy-l);color:var(--navy);">CL Production</span>
+    </div>
+    <div class="ptab" id="cfg-tab-cost-cl" onclick="switchCfgTab('cost-cl')" style="cursor:pointer;">
+      <i class="ti ti-flame" style="font-size:14px;margin-right:5px;" aria-hidden="true"></i>ต้นทุน CL
+      <span class="ptab-badge" style="background:var(--navy-l);color:var(--navy);">Furnace Cost</span>
+    </div>
+    <div class="ptab" id="cfg-tab-cost-sl" onclick="switchCfgTab('cost-sl')" style="cursor:pointer;">
+      <i class="ti ti-droplet" style="font-size:14px;margin-right:5px;" aria-hidden="true"></i>ต้นทุน SL
+      <span class="ptab-badge" style="background:var(--teal-l);color:var(--teal);">ATC Cost</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- TAB 1: FURNACE / PLAN             -->
+  <!-- ══════════════════════════════════ -->
+  <div id="cfg-furnace" class="content">
+
+    <!-- Effective date notice -->
+    <div style="background:var(--amber-l);border:1px solid #fde047;border-radius:var(--rl);padding:12px 16px;display:flex;align-items:center;gap:10px;">
+      <i class="ti ti-info-circle" style="font-size:18px;color:var(--amber);flex-shrink:0;" aria-hidden="true"></i>
+      <div style="font-size:12px;color:var(--amber);">
+        <strong>การบันทึกจะมีผลตั้งแต่วันที่กำหนด</strong> — ค่าเดิมของวันก่อนหน้าจะไม่เปลี่ยนแปลง
+        สามารถดูประวัติย้อนหลังได้ในส่วน "ประวัติการตั้งค่า"
+      </div>
+    </div>
+
+    <!-- Effective date selector -->
+    <div class="card" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-calendar-event" style="font-size:16px;color:var(--navy);" aria-hidden="true"></i>
+        <span style="font-size:12.5px;font-weight:500;">มีผลตั้งแต่วันที่:</span>
+      </div>
+      <input type="date" id="cfgEffDate" value="2026-05-27"
+        style="border:1px solid var(--border);border-radius:var(--r);padding:6px 12px;font-size:12.5px;font-family:var(--font);color:var(--text);background:var(--surface2);"/>
+      <div style="font-size:11px;color:var(--text3);">Config นี้จะใช้กับการแสดงผลย้อนหลังตั้งแต่วันที่เลือก</div>
+      <div style="margin-left:auto;font-size:11px;color:var(--text3);">Config ปัจจุบัน: 01 พ.ค. 2569</div>
+    </div>
+
+    <!-- Furnace config cards -->
+    <div class="z-hdr"><i class="ti ti-building-factory-2" aria-hidden="true"></i>ตั้งค่าเตาผลิต — Cap และสถานะ</div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;">
+
+      <!-- F1 -->
+      <div class="card" id="fcard-1">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:600;">Furnace 1</div>
+          <select id="f1-status" onchange="updateFurnaceCard(1)"
+            style="border:1px solid var(--border);border-radius:var(--r);padding:4px 10px;font-size:11.5px;font-family:var(--font);background:var(--surface2);color:var(--text);">
+            <option value="active">✅ ผลิตปกติ</option>
+            <option value="pm">🔧 PM</option>
+            <option value="repair">🔴 ซ่อม</option>
+            <option value="upgrade">🔨 ปรับปรุง</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">Cap (kg/วัน)</label>
+            <input type="number" id="f1-cap" value="45000" min="0" step="1000"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:16px;font-weight:500;font-family:var(--mono);color:var(--navy);background:var(--surface2);"
+              oninput="calcCapPerShift(1)"/>
+          </div>
+          <div style="background:var(--navy-l);border-radius:var(--r);padding:8px 12px;font-size:11.5px;">
+            <span style="color:var(--text3);">Cap/กะ:</span>
+            <span id="f1-shift" style="font-weight:600;color:var(--navy);font-family:var(--mono);">15,000 kg</span>
+          </div>
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">เป้า VN (m³/ตัน)</label>
+            <input type="number" id="f1-vn" value="155" min="100" max="300"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:14px;font-weight:500;font-family:var(--mono);color:var(--text);background:var(--surface2);"/>
+          </div>
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">CL Product Code</label>
+            <input type="text" id="f1-code" value="CL3.4-F" placeholder="เช่น CL3.4-F"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:13px;font-family:var(--mono);color:var(--orange);background:var(--surface2);"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- F2 -->
+      <div class="card" id="fcard-2" style="opacity:.85;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:600;">Furnace 2</div>
+          <select id="f2-status" onchange="updateFurnaceCard(2)"
+            style="border:1px solid var(--border);border-radius:var(--r);padding:4px 10px;font-size:11.5px;font-family:var(--font);background:var(--surface2);color:var(--text);">
+            <option value="active">✅ ผลิตปกติ</option>
+            <option value="pm" selected>🔧 PM</option>
+            <option value="repair">🔴 ซ่อม</option>
+            <option value="upgrade">🔨 ปรับปรุง</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">Cap (kg/วัน)</label>
+            <input type="number" id="f2-cap" value="45000" min="0" step="1000"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:16px;font-weight:500;font-family:var(--mono);color:var(--navy);background:#f8f8f8;"
+              disabled/>
+          </div>
+          <div style="background:var(--amber-l);border-radius:var(--r);padding:8px 12px;font-size:11.5px;">
+            <span style="color:var(--amber);font-weight:500;">⚠️ หยุด PM — Cap ไม่นับ</span>
+          </div>
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">เป้า VN (m³/ตัน)</label>
+            <input type="number" id="f2-vn" value="155" min="100" max="300" disabled
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:14px;font-weight:500;font-family:var(--mono);color:var(--text3);background:#f8f8f8;"/>
+          </div>
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">CL Product Code</label>
+            <input type="text" id="f2-code" value="CL3.4-E" placeholder="เช่น CL3.4-E" disabled
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:13px;font-family:var(--mono);color:var(--text3);background:#f8f8f8;"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- F3 -->
+      <div class="card" id="fcard-3">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:600;">Furnace 3</div>
+          <select id="f3-status" onchange="updateFurnaceCard(3)"
+            style="border:1px solid var(--border);border-radius:var(--r);padding:4px 10px;font-size:11.5px;font-family:var(--font);background:var(--surface2);color:var(--text);">
+            <option value="active" selected>✅ ผลิตปกติ</option>
+            <option value="pm">🔧 PM</option>
+            <option value="repair">🔴 ซ่อม</option>
+            <option value="upgrade">🔨 ปรับปรุง</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">Cap (kg/วัน)</label>
+            <input type="number" id="f3-cap" value="45000" min="0" step="1000"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:16px;font-weight:500;font-family:var(--mono);color:var(--navy);background:var(--surface2);"
+              oninput="calcCapPerShift(3)"/>
+          </div>
+          <div style="background:var(--navy-l);border-radius:var(--r);padding:8px 12px;font-size:11.5px;">
+            <span style="color:var(--text3);">Cap/กะ:</span>
+            <span id="f3-shift" style="font-weight:600;color:var(--navy);font-family:var(--mono);">15,000 kg</span>
+          </div>
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">เป้า VN (m³/ตัน)</label>
+            <input type="number" id="f3-vn" value="155" min="100" max="300"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:14px;font-weight:500;font-family:var(--mono);color:var(--text);background:var(--surface2);"/>
+          </div>
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">CL Product Code</label>
+            <input type="text" id="f3-code" value="CL3.4-G" placeholder="เช่น CL3.4-G"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:13px;font-family:var(--mono);color:var(--orange);background:var(--surface2);"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- F4 -->
+      <div class="card" id="fcard-4">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:600;">Furnace 4</div>
+          <select id="f4-status" onchange="updateFurnaceCard(4)"
+            style="border:1px solid var(--border);border-radius:var(--r);padding:4px 10px;font-size:11.5px;font-family:var(--font);background:var(--surface2);color:var(--text);">
+            <option value="active" selected>✅ ผลิตปกติ</option>
+            <option value="pm">🔧 PM</option>
+            <option value="repair">🔴 ซ่อม</option>
+            <option value="upgrade">🔨 ปรับปรุง</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">Cap (kg/วัน)</label>
+            <input type="number" id="f4-cap" value="45000" min="0" step="1000"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:16px;font-weight:500;font-family:var(--mono);color:var(--navy);background:var(--surface2);"
+              oninput="calcCapPerShift(4)"/>
+          </div>
+          <div style="background:var(--navy-l);border-radius:var(--r);padding:8px 12px;font-size:11.5px;">
+            <span style="color:var(--text3);">Cap/กะ:</span>
+            <span id="f4-shift" style="font-weight:600;color:var(--navy);font-family:var(--mono);">15,000 kg</span>
+          </div>
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">เป้า VN (m³/ตัน)</label>
+            <input type="number" id="f4-vn" value="155" min="100" max="300"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:14px;font-weight:500;font-family:var(--mono);color:var(--text);background:var(--surface2);"/>
+          </div>
+          <div>
+            <label style="font-size:10.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;">CL Product Code</label>
+            <input type="text" id="f4-code" value="CL3.4-H" placeholder="เช่น CL3.4-H"
+              style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:13px;font-family:var(--mono);color:var(--orange);background:var(--surface2);"/>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /furnace grid -->
+
+    <!-- Summary + Save -->
+    <div class="card" style="background:var(--navy-l);border-color:#bfdbfe;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--navy);margin-bottom:4px;">สรุป Cap รวม</div>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:12px;">
+            <span style="color:var(--text2);">เตาที่ผลิต: <strong id="sum-active-furnaces" style="color:var(--navy);">3 เตา</strong></span>
+            <span style="color:var(--text2);">Cap รวม/วัน: <strong id="sum-cap-day" style="color:var(--navy);font-family:var(--mono);">135,000 kg</strong></span>
+            <span style="color:var(--text2);">Cap รวม/เดือน: <strong id="sum-cap-month" style="color:var(--navy);font-family:var(--mono);">~4,050 ตัน</strong></span>
+          </div>
+        </div>
+        <button onclick="saveFurnaceConfig()"
+          style="background:var(--navy);color:#fff;border:none;padding:10px 24px;border-radius:var(--r);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer;display:flex;align-items:center;gap:7px;">
+          <i class="ti ti-device-floppy" aria-hidden="true"></i>บันทึก Config
+        </button>
+      </div>
+    </div>
+
+    <!-- Config History -->
+    <div>
+      <div class="z-hdr"><i class="ti ti-history" aria-hidden="true"></i>ประวัติการตั้งค่า (Effective Config Log)</div>
+      <div class="card">
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="background:var(--surface2);">
+                <th style="padding:8px 12px;text-align:left;font-weight:500;font-size:10.5px;color:var(--text3);border-bottom:1px solid var(--border);">มีผลตั้งแต่</th>
+                <th style="padding:8px 12px;text-align:center;font-weight:500;font-size:10.5px;color:var(--text3);border-bottom:1px solid var(--border);">F1</th>
+                <th style="padding:8px 12px;text-align:center;font-weight:500;font-size:10.5px;color:var(--text3);border-bottom:1px solid var(--border);">F2</th>
+                <th style="padding:8px 12px;text-align:center;font-weight:500;font-size:10.5px;color:var(--text3);border-bottom:1px solid var(--border);">F3</th>
+                <th style="padding:8px 12px;text-align:center;font-weight:500;font-size:10.5px;color:var(--text3);border-bottom:1px solid var(--border);">F4</th>
+                <th style="padding:8px 12px;text-align:right;font-weight:500;font-size:10.5px;color:var(--text3);border-bottom:1px solid var(--border);">Cap รวม/วัน</th>
+                <th style="padding:8px 12px;text-align:left;font-weight:500;font-size:10.5px;color:var(--text3);border-bottom:1px solid var(--border);">บันทึกโดย</th>
+              </tr>
+            </thead>
+            <tbody id="cfgHistoryBody">
+              <tr>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);">
+                  <span style="font-family:var(--mono);font-size:11.5px;">15 พ.ค. 2569</span>
+                  <span style="font-size:10px;color:var(--text3);margin-left:6px;">07:30 น.</span>
+                </td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:center;"><span style="background:var(--green-l);color:var(--green);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;">45,000</span></td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:center;"><span style="background:var(--amber-l);color:var(--amber);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;">PM</span></td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:center;"><span style="background:var(--green-l);color:var(--green);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;">45,000</span></td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:center;"><span style="background:var(--green-l);color:var(--green);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;">45,000</span></td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:right;font-family:var(--mono);font-weight:500;">135,000 kg</td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);color:var(--text3);">WJ</td>
+              </tr>
+              <tr style="background:var(--surface2);">
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);">
+                  <span style="font-family:var(--mono);font-size:11.5px;">01 พ.ค. 2569</span>
+                  <span style="font-size:10px;color:var(--text3);margin-left:6px;">08:00 น.</span>
+                </td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:center;"><span style="background:var(--green-l);color:var(--green);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;">45,000</span></td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:center;"><span style="background:var(--green-l);color:var(--green);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;">45,000</span></td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:center;"><span style="background:var(--green-l);color:var(--green);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;">45,000</span></td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:center;"><span style="background:var(--green-l);color:var(--green);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;">45,000</span></td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:right;font-family:var(--mono);font-weight:500;">180,000 kg</td>
+                <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);color:var(--text3);">WJ</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cfg-furnace -->
+
+  <!-- ══════════════════════════════════ -->
+  <!-- TAB 2: COST CL                    -->
+  <!-- ══════════════════════════════════ -->
+  <div id="cfg-cost-cl" class="content" style="display:none;">
+
+    <div style="background:var(--navy-l);border:1px solid #bfdbfe;border-radius:var(--rl);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <i class="ti ti-info-circle" style="font-size:16px;color:var(--navy);" aria-hidden="true"></i>
+      <span style="font-size:12px;color:var(--navy);">ราคาต้นทุน CL ใช้สำหรับคำนวณ <strong>ต้นทุนการผลิต Cullet</strong> ต่อตัน — ใช้ใน Management Report</span>
+    </div>
+
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px;">ราคาต้นทุน CL (Furnace)</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:18px;">มีผลตั้งแต่: <input type="date" value="2026-05-27" style="border:1px solid var(--border);border-radius:var(--r);padding:3px 8px;font-size:11px;font-family:var(--font);color:var(--text);background:var(--surface2);"/></div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
+
+        <!-- Energy costs -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">
+            <i class="ti ti-flame" style="font-size:13px;" aria-hidden="true"></i> พลังงาน
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="cfg-row">
+              <div class="cfg-lbl">NG (Natural Gas)</div>
+              <div class="cfg-inp-wrap">
+                <input type="number" id="cl-ng" value="15.2" step="0.1" class="cfg-inp"/>
+                <span class="cfg-unit">฿/m³</span>
+              </div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-lbl">ไฟฟ้า (Electric)</div>
+              <div class="cfg-inp-wrap">
+                <input type="number" id="cl-elec" value="4.2" step="0.1" class="cfg-inp"/>
+                <span class="cfg-unit">฿/kWh</span>
+              </div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-lbl">น้ำหล่อเย็น (Cooling Water)</div>
+              <div class="cfg-inp-wrap">
+                <input type="number" id="cl-cw" value="2.0" step="0.1" class="cfg-inp"/>
+                <span class="cfg-unit">฿/m³</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Raw material costs -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">
+            <i class="ti ti-package" style="font-size:13px;" aria-hidden="true"></i> วัตถุดิบ (Raw Material)
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="cfg-row">
+              <div class="cfg-lbl">Sand (ทราย)</div>
+              <div class="cfg-inp-wrap">
+                <input type="number" id="cl-sand" value="0.8" step="0.1" class="cfg-inp"/>
+                <span class="cfg-unit">฿/kg</span>
+              </div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-lbl">Soda Ash (โซดาแอช)</div>
+              <div class="cfg-inp-wrap">
+                <input type="number" id="cl-soda" value="12.0" step="0.5" class="cfg-inp"/>
+                <span class="cfg-unit">฿/kg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estimated cost -->
+      <div style="margin-top:18px;padding:14px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:8px;">ต้นทุนโดยประมาณต่อตัน Cullet (คำนวณจาก VN เฉลี่ย 165 m³/ตัน)</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;font-family:var(--mono);color:var(--orange);" id="cl-cost-ng">2,508</div>
+            <div style="font-size:10px;color:var(--text3);">NG ฿/ตัน</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;font-family:var(--mono);color:var(--blue);" id="cl-cost-elec">88</div>
+            <div style="font-size:10px;color:var(--text3);">ไฟฟ้า ฿/ตัน</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;font-family:var(--mono);color:var(--green);" id="cl-cost-rm">2,560</div>
+            <div style="font-size:10px;color:var(--text3);">RM ฿/ตัน</div>
+          </div>
+          <div style="width:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="text-align:center;">
+            <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--navy);" id="cl-cost-total">5,156</div>
+            <div style="font-size:10px;color:var(--text3);">รวมต้นทุน ฿/ตัน</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;justify-content:flex-end;">
+        <button onclick="saveCostCL()"
+          style="background:var(--navy);color:#fff;border:none;padding:10px 24px;border-radius:var(--r);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer;display:flex;align-items:center;gap:7px;">
+          <i class="ti ti-device-floppy" aria-hidden="true"></i>บันทึกราคา
+        </button>
+      </div>
+    </div>
+  </div><!-- /cfg-cost-cl -->
+
+  <!-- ══════════════════════════════════ -->
+  <!-- TAB 3: COST SL                    -->
+  <!-- ══════════════════════════════════ -->
+  <div id="cfg-cost-sl" class="content" style="display:none;">
+
+    <div style="background:var(--teal-l);border:1px solid #a5f3fc;border-radius:var(--rl);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <i class="ti ti-info-circle" style="font-size:16px;color:var(--teal);" aria-hidden="true"></i>
+      <span style="font-size:12px;color:var(--teal);">ราคาต้นทุน SL ใช้สำหรับคำนวณ <strong>ต้นทุนการผลิต Sodium Silicate Liquid</strong> ต่อตัน</span>
+    </div>
+
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px;">ราคาต้นทุน SL (ATC)</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:18px;">มีผลตั้งแต่: <input type="date" value="2026-05-27" style="border:1px solid var(--border);border-radius:var(--r);padding:3px 8px;font-size:11px;font-family:var(--font);color:var(--text);background:var(--surface2);"/></div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
+
+        <!-- Cullet input cost -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">
+            <i class="ti ti-cube" style="font-size:13px;" aria-hidden="true"></i> Cullet (วัตถุดิบ)
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="cfg-row">
+              <div class="cfg-lbl">CL-2.0</div>
+              <div class="cfg-inp-wrap"><input type="number" id="sl-cl20" value="3.2" step="0.1" class="cfg-inp"/><span class="cfg-unit">฿/kg</span></div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-lbl">CL-2.5</div>
+              <div class="cfg-inp-wrap"><input type="number" id="sl-cl25" value="3.5" step="0.1" class="cfg-inp"/><span class="cfg-unit">฿/kg</span></div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-lbl">CL-3.2</div>
+              <div class="cfg-inp-wrap"><input type="number" id="sl-cl32" value="3.8" step="0.1" class="cfg-inp"/><span class="cfg-unit">฿/kg</span></div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-lbl">CL-3.3</div>
+              <div class="cfg-inp-wrap"><input type="number" id="sl-cl33" value="3.8" step="0.1" class="cfg-inp"/><span class="cfg-unit">฿/kg</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chemical + Energy -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">
+            <i class="ti ti-flask" style="font-size:13px;" aria-hidden="true"></i> สารเคมี & พลังงาน
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="cfg-row">
+              <div class="cfg-lbl">CS50 (Caustic Soda)</div>
+              <div class="cfg-inp-wrap"><input type="number" id="sl-cs50" value="25.0" step="0.5" class="cfg-inp"/><span class="cfg-unit">฿/kg</span></div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-lbl">Steam</div>
+              <div class="cfg-inp-wrap"><input type="number" id="sl-steam" value="1.5" step="0.1" class="cfg-inp"/><span class="cfg-unit">฿/kg</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Water -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">
+            <i class="ti ti-droplet" style="font-size:13px;" aria-hidden="true"></i> น้ำ (Water)
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="cfg-row">
+              <div class="cfg-lbl">Water-FW (น้ำประปา)</div>
+              <div class="cfg-inp-wrap"><input type="number" id="sl-fw" value="15.0" step="0.5" class="cfg-inp"/><span class="cfg-unit">฿/m³</span></div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-lbl">Water-RW (น้ำ Recycle)</div>
+              <div class="cfg-inp-wrap"><input type="number" id="sl-rw" value="5.0" step="0.5" class="cfg-inp"/><span class="cfg-unit">฿/m³</span></div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-lbl">Water-CW (Cooling)</div>
+              <div class="cfg-inp-wrap"><input type="number" id="sl-cw" value="3.0" step="0.5" class="cfg-inp"/><span class="cfg-unit">฿/m³</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;justify-content:flex-end;">
+        <button onclick="saveCostSL()"
+          style="background:var(--teal);color:#fff;border:none;padding:10px 24px;border-radius:var(--r);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer;display:flex;align-items:center;gap:7px;">
+          <i class="ti ti-device-floppy" aria-hidden="true"></i>บันทึกราคา
+        </button>
+      </div>
+    </div>
+  </div><!-- /cfg-cost-sl -->
+
+</div><!-- /page-config -->
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ═══════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════
+var PAGES = ['overview','production','sales','wms','transport','energy','config'];
+var TITLES = {overview:'Overview',production:'การผลิต',sales:'ยอดขาย',wms:'คลังสินค้า',transport:'ขนส่ง',energy:'พลังงาน',config:'ตั้งค่า / Plan'};
+
+function nav(page) {
+  PAGES.forEach(function(p){
+    var el = document.getElementById('page-'+p);
+    if(el) el.classList.toggle('active', p===page);
+    var nb = document.getElementById('nav-'+p);
+    if(nb) nb.classList.toggle('active', p===page);
+  });
+  document.getElementById('topTitle').textContent = TITLES[page]||page;
+  // init charts on first visit
+  if(page==='production' && !chartsInited) initCharts();
+  if(page==='sales' && !sSalesInited) sInitCharts();
+}
+
+// ═══════════════════════════════════════
+//  PROD TAB SWITCH (CL / SL)
+// ═══════════════════════════════════════
+function switchProdTab(tab) {
+  document.getElementById('cl-section').style.display = tab==='cl' ? '' : 'none';
+  document.getElementById('sl-section').style.display = tab==='sl' ? '' : 'none';
+  document.getElementById('tab-cl').className = 'ptab' + (tab==='cl' ? ' active-cl' : '');
+  document.getElementById('tab-sl').className = 'ptab' + (tab==='sl' ? ' active-sl' : '');
+  if(tab==='sl' && !slInited) { initSLCharts(); slInited=true; }
+}
+
+// ═══════════════════════════════════════
+//  CL VIEW SWITCH (Day / Month)
+// ═══════════════════════════════════════
+function switchClView(v) {
+  document.getElementById('cl-daily').style.display   = v==='day'   ? '' : 'none';
+  document.getElementById('cl-monthly').style.display = v==='month' ? '' : 'none';
+  document.getElementById('cl-day-controls').style.display   = v==='day'   ? 'flex' : 'none';
+  document.getElementById('cl-month-controls').style.display = v==='month' ? 'flex' : 'none';
+  document.getElementById('cl-view-day').className   = 'seg-b' + (v==='day'   ? ' active' : '');
+  document.getElementById('cl-view-month').className = 'seg-b' + (v==='month' ? ' active' : '');
+  if(v==='month' && !clMonthInited) { initClMonthCharts(); clMonthInited=true; }
+}
+
+// ═══════════════════════════════════════
+//  SHARED
+// ═══════════════════════════════════════
+var BG='#ffffff', GRID='#e2e5ea', T2='#5a6275';
+var chartsInited=false, clMonthInited=false, slInited=false;
+var fmt = function(n){return Math.round(n).toLocaleString();};
+var fmtK = function(n){if(n>=1000000) return (n/1000000).toFixed(2)+'M'; return Math.round(n/1000)+'k';};
+
+function initCharts() {
+  chartsInited = true;
+  buildClDailyChart();
+  buildClMoleDonut();
+  buildClAlerts();
+}
+
+// CL Daily chart labels (must be top-level for callback scope)
+var CL_LABELS = ['F1 เช้า','F1 บ่าย','F1 ดึก','F2 (PM)','F3 เช้า','F3 บ่าย','F3 ดึก','F4 เช้า','F4 บ่าย','F4 ดึก'];
+
+function buildClDailyChart() {
+  var labels = CL_LABELS;
+  var cullet = [14416,19248,18038,null,12139,14348,13241,15455,16574,15458];
+  var vn     = [188.7,144.9,150.8,null,192.4,166.0,181.1,162.4,150.9,163.6];
+  var barColors = ['#93c5fd','#1e3a8a','#16a34a','#e2e5ea','#93c5fd','#1e3a8a','#16a34a','#93c5fd','#1e3a8a','#16a34a'];
+
+  // Plugin: draw VN labels above bars, NOT overlapping
+  var vnLabelPlugin = {
+    id:'vnLabel',
+    afterDatasetsDraw:function(chart) {
+      var ctx=chart.ctx; var scales=chart.scales;
+      var meta0 = chart.getDatasetMeta(0); // bars
+      var meta1 = chart.getDatasetMeta(1); // VN line
+      if (!meta1.data.length) return;
+      ctx.save();
+      meta1.data.forEach(function(pt, i){
+        if (vn[i] == null) return;
+        var bar = meta0.data[i];
+        if (!bar) return;
+        // Position: above the bar top, not overlapping bar
+        var barTop = bar.y;
+        var labelY = Math.min(pt.y - 18, barTop - 14);
+        ctx.font = '500 9px IBM Plex Sans,sans-serif';
+        ctx.fillStyle = '#ea580c';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(vn[i].toFixed(1), pt.x, labelY);
+      });
+      ctx.restore();
+    }
+  };
+
+  new Chart(document.getElementById('clBarChart'), {
+    type:'bar',
+    plugins:[vnLabelPlugin],
+    data:{labels:labels,
+      datasets:[
+        { label:'Cullet (kg)', data:cullet, backgroundColor:barColors, borderRadius:4, yAxisID:'yLeft', order:2, barPercentage:0.6 },
+        { label:'VN', data:vn, type:'line', yAxisID:'yRight', order:1,
+          borderColor:'#ea580c', backgroundColor:'#ea580c',
+          borderWidth:2, pointRadius:5, pointHoverRadius:7,
+          pointBorderColor:BG, pointBorderWidth:2, tension:0, spanGaps:false }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{ padding:{ top:28 } }, // extra top space for VN labels
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:BG, borderColor:GRID, borderWidth:1,
+          titleColor:'#1a1d23', bodyColor:T2, padding:10,
+          callbacks:{
+            label:function(ctx) {
+              if(ctx.dataset.label==='Cullet (kg)' && ctx.raw) return ' Cullet: '+fmt(ctx.raw)+' kg';
+              if(ctx.dataset.label==='VN' && ctx.raw) return ' VN: '+ctx.raw+' m³/ตัน';
+              return null;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{color:GRID,lineWidth:0.5}, ticks:{color:T2,font:{size:9,family:'IBM Plex Sans Thai,sans-serif'},maxRotation:0,callback(v,i){return labels[i].split('\n');}} },
+        yLeft:{ type:'linear',position:'left', grid:{color:GRID,lineWidth:0.5}, min:0, max:22000,
+          ticks:{color:T2,font:{size:10},callback:function(v){return v===0?'0':(v/1000).toFixed(0)+'k';}},
+          title:{display:true,text:'Cullet (kg)',color:T2,font:{size:10}} },
+        yRight:{ type:'linear',position:'right',
+          // VN scale starts at 100, VN labels float ABOVE bars so we push scale top up
+          min:100, max:250,
+          grid:{drawOnChartArea:false},
+          ticks:{color:'#ea580c',font:{size:10}},
+          title:{display:true,text:'VN (m³/ตัน)',color:'#ea580c',font:{size:10}} }
+      }
+    }
+  });
+
+  // Cap line annotation via afterDraw plugin would conflict; use reference line dataset instead
+  // Add dashed cap line as separate dataset (invisible in legend)
+  // Already handled by yLeft max visual; skip for simplicity
+}
+
+function buildClMoleDonut() {
+  var ctx = document.getElementById('clDonut').getContext('2d');
+  var sl25=51702, sl32=87215, tot=sl25+sl32;
+  new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:['CL-2.5','CL-3.2'],datasets:[{data:[sl25,sl32],backgroundColor:['#2563eb','#ea580c'],borderColor:BG,borderWidth:3,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},
+      tooltip:{backgroundColor:BG,borderColor:GRID,borderWidth:1,bodyColor:T2,padding:10,
+        callbacks:{label:function(ctx){return ' '+fmt(ctx.raw)+' kg ('+(ctx.raw/tot*100).toFixed(1)+'%)'}}}
+    }},
+    plugins:[{id:'clMoleCenter',afterDraw:function(ch){
+      var ctxD=ch.ctx, caD=ch.chartArea;
+      var cxD=(caD.left+caD.right)/2, cyD=(caD.top+caD.bottom)/2;
+      ctxD.save();
+      ctxD.font='500 13px IBM Plex Sans Thai,sans-serif';
+      ctxD.fillStyle='#1a1d23'; ctxD.textAlign='center'; ctxD.textBaseline='middle';
+      ctxD.fillText('37.2%',cxD,cyD-8);
+      ctxD.font='10px IBM Plex Sans Thai,sans-serif';
+      ctxD.fillStyle='#9ba3b2';
+      ctxD.fillText('CL-2.5',cxD,cyD+9);
+      ctxD.restore();
+    }}]
+  });
+  var leg=document.getElementById('clMoleLegend');
+  [{lbl:'CL-2.5',val:sl25,col:'#2563eb'},{lbl:'CL-3.2',val:sl32,col:'#ea580c'}].forEach(function(item){
+    var lbl=item.lbl,val=item.val,col=item.col;
+    leg.innerHTML+='<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid '+GRID+';">'+
+      '<div style="display:flex;align-items:center;gap:7px;"><div style="width:10px;height:10px;border-radius:2px;background:'+col+';"></div><span style="font-weight:500;">'+lbl+'</span></div>'+
+      '<span>'+fmt(val)+' kg <span style="color:#9ba3b2;">('+((val/tot*100).toFixed(1))+'%)</span></span></div>';
+  });
+}
+
+function buildClAlerts() {
+  var alerts=[
+    {cls:'ins-bd',icon:'ti-alert-triangle',title:'F3 กะเช้า VN=192.4',body:'สูงที่สุดวันนี้ เกินเป้า +37.4'},
+    {cls:'ins-bd',icon:'ti-alert-triangle',title:'F1 กะเช้า VN=188.7',body:'เกินเป้า +33.7 m³/ตัน'},
+    {cls:'ins-ok',icon:'ti-check',title:'F1 กะบ่าย VN=144.9',body:'ดีที่สุด ต่ำกว่าเป้า'},
+    {cls:'ins-ok',icon:'ti-check',title:'F4 ทุกกะ ≤ 165',body:'ประสิทธิภาพดีสม่ำเสมอ'},
+  ];
+  document.getElementById('clAlerts').innerHTML=alerts.map(function(a){
+    return '<div class="ins '+a.cls+'"><div class="ins-hd"><i class="ti '+a.icon+'" aria-hidden="true"></i>'+a.title+'</div><div class="ins-body">'+a.body+'</div></div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+//  CL MONTHLY CHARTS
+// ═══════════════════════════════════════
+function initClMonthCharts() {
+  var days = Array.from({length:23},function(_,i){return i+1;});
+  var f1=[51,52,14,48,50,51,52,53,54,55,50,52,51,54,48,47,49,46,48,50,47,50,52];
+  var f3=[39,40,12,38,39,40,38,40,41,40,39,40,38,41,36,37,38,35,37,38,36,38,40];
+  var f4=[47,48,15,46,47,48,47,48,49,50,47,48,47,49,45,44,46,43,45,46,44,46,47];
+  var vnF1=[188,162,120,158,162,155,160,150,165,152,158,162,155,158,165,162,168,175,160,158,162,162,162];
+  var vnF3=[192,178,155,175,180,172,178,168,182,175,178,180,172,176,182,178,185,190,175,178,180,180,178];
+  var vnF4=[162,158,130,155,160,155,162,150,165,152,158,162,155,158,162,158,165,168,155,162,163,162,162];
+
+  // ── Stacked Bar ──
+  var ctx1=document.getElementById('clMonthBar').getContext('2d');
+  var pmPlugin={id:'pmShade',beforeDraw:function(chart){
+    var ca=chart.chartArea,sc=chart.scales;
+    if(!ca||!sc.x)return;
+    var x0=sc.x.getPixelForValue(13.5);
+    chart.ctx.save();
+    chart.ctx.fillStyle='rgba(228,232,240,0.2)';
+    chart.ctx.fillRect(x0,ca.top,ca.right-x0,ca.bottom-ca.top);
+    chart.ctx.strokeStyle='rgba(148,163,184,0.4)';
+    chart.ctx.lineWidth=1;
+    chart.ctx.setLineDash([4,4]);
+    chart.ctx.beginPath();
+    chart.ctx.moveTo(x0,ca.top);
+    chart.ctx.lineTo(x0,ca.bottom);
+    chart.ctx.stroke();
+    chart.ctx.setLineDash([]);
+    chart.ctx.fillStyle='rgba(148,163,184,0.8)';
+    chart.ctx.font='9px IBM Plex Sans Thai,sans-serif';
+    chart.ctx.textAlign='center';
+    chart.ctx.fillText('F2 PM (15-23)',(x0+ca.right)/2,ca.top+11);
+    chart.ctx.restore();
+  }};
+  new Chart(ctx1,{
+    type:'bar',plugins:[pmPlugin],
+    data:{
+      labels:days.map(function(d){return d+'';}),
+      datasets:[
+        {label:'F1 (CL-2.5)',data:f1,backgroundColor:'#2563eb',stack:'c',borderRadius:2,order:2},
+        {label:'F3 (CL-3.2)',data:f3,backgroundColor:'#ea580c',stack:'c',order:2},
+        {label:'F4 (CL-3.2)',data:f4,backgroundColor:'#16a34a',stack:'c',order:2},
+        {label:'Target',data:Array(23).fill(135),type:'line',borderColor:'#1e3a8a',
+         borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,order:1}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:BG,borderColor:GRID,borderWidth:1,titleColor:'#1a1d23',bodyColor:T2,padding:10,
+          callbacks:{
+            footer:function(items){
+              var tot=0;
+              items.forEach(function(i){if(i.dataset.label!=='Target')tot+=(i.raw||0);});
+              return tot>0?'รวม: '+tot+' ตัน':'';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{stacked:true,grid:{color:GRID,lineWidth:0.5},
+          ticks:{color:T2,font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:12}},
+        y:{stacked:true,grid:{color:GRID,lineWidth:0.5},min:0,max:200,
+          ticks:{color:T2,font:{size:10},callback:function(v){return v+'t';}},
+          title:{display:true,text:'ตัน/วัน',color:T2,font:{size:10}}}
+      }
+    }
+  });
+
+  // ── VN รายวัน Line Chart ──
+  var ctx2=document.getElementById('clVnDaily').getContext('2d');
+  new Chart(ctx2,{
+    type:'line',
+    data:{
+      labels:days.map(function(d){return d+'';}),
+      datasets:[
+        {label:'F1',data:vnF1,borderColor:'#2563eb',backgroundColor:'#2563eb',
+         borderWidth:2,pointRadius:2,pointHoverRadius:5,pointBorderColor:BG,pointBorderWidth:1.5,tension:0.3},
+        {label:'F3',data:vnF3,borderColor:'#ea580c',backgroundColor:'#ea580c',
+         borderWidth:2,pointRadius:2,pointHoverRadius:5,pointBorderColor:BG,pointBorderWidth:1.5,tension:0.3},
+        {label:'F4',data:vnF4,borderColor:'#16a34a',backgroundColor:'#16a34a',
+         borderWidth:2,pointRadius:2,pointHoverRadius:5,pointBorderColor:BG,pointBorderWidth:1.5,tension:0.3},
+        {label:'เป้า 155',data:Array(23).fill(155),borderColor:'#ea580c',borderWidth:1,
+         borderDash:[6,3],pointRadius:0,fill:false,tension:0}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:BG,borderColor:GRID,borderWidth:1,titleColor:'#1a1d23',bodyColor:T2,padding:10,
+          callbacks:{
+            label:function(ctx){
+              if(ctx.dataset.label==='เป้า 155') return ' เป้า: 155 m³/ตัน';
+              return ' '+ctx.dataset.label+': '+ctx.raw+' m³/ตัน';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{grid:{color:GRID,lineWidth:0.5},
+          ticks:{color:T2,font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:12}},
+        y:{grid:{color:GRID,lineWidth:0.5},min:100,max:220,
+          ticks:{color:T2,font:{size:10}},
+          title:{display:true,text:'VN (m³/ตัน)',color:T2,font:{size:10}}}
+      }
+    }
+  });
+}
+// ═══════════════════════════════════════
+//  SL DATA (จากไฟล์จริง ATC_May.xlsx)
+// ═══════════════════════════════════════
+var SL_DAYS=[1,2,3,4,5,6,7,8,9,10,11,12,13];
+var SL25=[193874,175151,139033,76327,132560,150166,150183,193546,176423,217076,208160,210729,204350];
+var SL32=[0,0,0,0,31519,62792,73502,67383,63218,47697,40764,10810,30272];
+var SL_BATCH=[18,15,12,7,15,20,21,24,22,24,22,21,22];
+var SL_TOTAL=SL25.reduce(function(a,b){return a+b;},0)+SL32.reduce(function(a,b){return a+b;},0);
+
+var DLY_TYPE={"1":{"2.4A":193874},"2":{"240":175151},"3":{"2.4A":54289,"240":84744},"4":{"2.4A":76327},"5":{"2.4A":64594,"240":67966,"3.4A":31519},"6":{"2.4A":150166,"3.4A":11719,"3.4I":30218,"3.4M":20855},"7":{"2.4A":150183,"3.4I":63113,"3.4M":10389},"8":{"2.4A":150715,"240":42831,"3.4A":35338,"3.4I":32045},"9":{"2.4A":116157,"240":60266,"3.4I":52802,"3.4M":10416},"10":{"2.4A":206627,"240":10449,"3.4A":47697},"11":{"2.4A":10092,"240":198068,"3.4I":40764},"12":{"2.4A":210729,"3.4I":10810},"13":{"2.2A":43463,"2.4A":160887,"3.4A":10079,"3.4I":20193}};
+var DLY_TANK={"1":{"SL-01":54979,"SL-02":127880,"SL-06":11015},"2":{"SL-04":46464,"SL-06":128687},"3":{"SL-01":54289,"SL-04":47563,"SL-05":37181},"4":{"SL-01":76327},"5":{"SL-01":64594,"SL-06":67966,"SL-08":20246,"SL-09":11273},"6":{"G-2":30218,"SL-01":129963,"SL-02":20203,"SL-07":20855,"SL-09":11719},"7":{"G-2":31338,"G-3":31775,"SL-01":9567,"SL-02":140616,"SL-07":10389},"8":{"G-3":32045,"SL-01":150715,"SL-04":42831,"SL-08":35338},"9":{"G-2":52802,"SL-02":116157,"SL-04":60266,"SL-07":10416},"10":{"SL-01":151672,"SL-02":54955,"SL-05":10449,"SL-09":47697},"11":{"G-3":40764,"SL-02":10092,"SL-05":93824,"SL-06":104244},"12":{"G-3":10810,"SL-01":73284,"SL-02":137445},"13":{"G-2":20193,"SL-01":85661,"SL-02":75226,"SL-03":43463,"SL-09":10079}};
+var TNK_TYPE={"G-2":{"3.4I":134551},"G-3":{"3.4I":115394},"SL-01":{"2.4A":851051},"SL-02":{"2.4A":682574},"SL-03":{"2.2A":43463},"SL-04":{"240":197124},"SL-05":{"240":141454},"SL-06":{"2.4A":11015,"240":300897},"SL-07":{"3.4M":41660},"SL-08":{"3.4A":55584},"SL-09":{"3.4A":80768}};
+var TNK_DAY={"G-2":{"6":30218,"7":31338,"9":52802,"13":20193},"G-3":{"7":31775,"8":32045,"11":40764,"12":10810},"SL-01":{"1":54979,"3":54289,"4":76327,"5":64594,"6":129963,"7":9567,"8":150715,"10":151672,"12":73284,"13":85661},"SL-02":{"1":127880,"6":20203,"7":140616,"9":116157,"10":54955,"11":10092,"12":137445,"13":75226},"SL-03":{"13":43463},"SL-04":{"2":46464,"3":47563,"8":42831,"9":60266},"SL-05":{"3":37181,"10":10449,"11":93824},"SL-06":{"1":11015,"2":128687,"5":67966,"11":104244},"SL-07":{"6":20855,"7":10389,"9":10416},"SL-08":{"5":20246,"8":35338},"SL-09":{"5":11273,"6":11719,"10":47697,"13":10079}};
+var ALL_TANKS=['SL-01','SL-02','SL-03','SL-04','SL-05','SL-06','SL-07','SL-08','SL-09','SL-10','SL-11','SL-12','G-2','G-3'];
+var TYPE_COLS={'2.4A':'#2563eb','240':'#3b82f6','2.2A':'#93c5fd','3.4I':'#ea580c','3.4A':'#f97316','3.4M':'#fed7aa'};
+
+
+function classifySL(t){var s=String(t).trim();if(/^2/.test(s))return 'SL-2.5';if(/^3/.test(s))return 'SL-3.2';return 'อื่นๆ';}
+
+var slSelDay=null,slSelTank=null;
+var slBar,slDonut,slTank;
+
+function initSLCharts() {
+  // Bar chart
+  slBar=new Chart(document.getElementById('slBarChart'),{
+    type:'bar',
+    data:{
+      labels:SL_DAYS.map(function(d){return d+' พ.ค.';}),
+      datasets:[
+        {label:'SL-2.5',data:SL25.slice(),backgroundColor:'#2563eb',stack:'s',
+         borderRadius:{topLeft:0,topRight:0,bottomLeft:4,bottomRight:4},yAxisID:'yLeft',order:2},
+        {label:'SL-3.2',data:SL32.slice(),backgroundColor:'#ea580c',stack:'s',
+         borderRadius:{topLeft:4,topRight:4,bottomLeft:0,bottomRight:0},yAxisID:'yLeft',order:2},
+        {label:'Batch',data:SL_BATCH.slice(),type:'line',borderColor:'#1e3a8a',backgroundColor:'#1e3a8a',
+         borderWidth:2,pointRadius:4,pointHoverRadius:6,
+         pointBorderColor:BG,pointBorderWidth:2,tension:0.3,yAxisID:'yRight',order:1}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      onClick:function(e,els){
+        if(!els.length) return;
+        var d=SL_DAYS[els[0].index];
+        slSelDay=slSelDay===d?null:d;
+        slSelTank=null;
+        slUpdateAll();
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:BG,borderColor:GRID,borderWidth:1,
+          titleColor:'#1a1d23',bodyColor:T2,padding:10,
+          callbacks:{
+            label:function(ctx){
+              if(ctx.dataset.label==='SL-2.5') return ' SL-2.5: '+fmt(ctx.raw)+' kg';
+              if(ctx.dataset.label==='SL-3.2'&&ctx.raw>0) return ' SL-3.2: '+fmt(ctx.raw)+' kg';
+              if(ctx.dataset.label==='Batch') return ' Batch: '+ctx.raw;
+              return null;
+            },
+            footer:function(items){
+              var tot=0;
+              items.forEach(function(i){if(i.dataset.label!=='Batch') tot+=(i.raw||0);});
+              if(tot) return 'รวม: '+fmt(tot)+' kg';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{stacked:true,grid:{color:GRID,lineWidth:0.5},
+          ticks:{color:T2,font:{size:9,family:'IBM Plex Sans Thai,sans-serif'},maxRotation:0}},
+        yLeft:{stacked:true,grid:{color:GRID,lineWidth:0.5},min:0,max:300000,
+          ticks:{color:T2,font:{size:10},callback:function(v){return v===0?'0':(v/1000).toFixed(0)+'k';}},
+          title:{display:true,text:'SL (kg)',color:T2,font:{size:10}}},
+        yRight:{grid:{drawOnChartArea:false},min:0,max:30,
+          ticks:{color:'#1e3a8a',font:{size:10}},
+          title:{display:true,text:'Batch',color:'#1e3a8a',font:{size:10}}}
+      }
+    }
+  });
+
+  // Donut chart
+  slDonut=new Chart(document.getElementById('slDonutChart'),{
+    type:'doughnut',
+    data:{
+      labels:['SL-2.5','SL-3.2'],
+      datasets:[{data:[2227578,427957],backgroundColor:['#2563eb','#ea580c'],borderColor:BG,borderWidth:2,hoverOffset:4}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:BG,borderColor:GRID,borderWidth:1,bodyColor:T2,padding:10,
+          callbacks:{
+            label:function(ctx){
+              var tot=ctx.dataset.data.reduce(function(a,b){return a+b;},0);
+              return ' '+fmt(ctx.raw)+' kg ('+(ctx.raw/tot*100).toFixed(1)+'%)';
+            }
+          }
+        }
+      }
+    },
+    plugins:[{
+      id:'donutCenter',
+      afterDraw:function(chart){
+        var ctx=chart.ctx;
+        var ca=chart.chartArea;
+        var cx=(ca.left+ca.right)/2;
+        var cy=(ca.top+ca.bottom)/2;
+        var tot=chart.data.datasets[0].data.reduce(function(a,b){return a+b;},0);
+        var pct=tot>0?(chart.data.datasets[0].data[0]/tot*100).toFixed(1)+'%':'—';
+        ctx.save();
+        ctx.font='500 13px IBM Plex Sans Thai,sans-serif';
+        ctx.fillStyle='#1a1d23';
+        ctx.textAlign='center';
+        ctx.textBaseline='middle';
+        ctx.fillText(pct,cx,cy-8);
+        ctx.font='10px IBM Plex Sans Thai,sans-serif';
+        ctx.fillStyle='#9ba3b2';
+        ctx.fillText('SL-2.5',cx,cy+9);
+        ctx.restore();
+      }
+    }]
+  });
+
+  // Tank bar chart
+  var tankVals=ALL_TANKS.map(function(t){
+    return Object.keys(TNK_DAY[t]||{}).reduce(function(s,d){return s+TNK_DAY[t][d];},0);
+  });
+  slTank=new Chart(document.getElementById('slTankChart'),{
+    type:'bar',
+    data:{
+      labels:ALL_TANKS.slice(),
+      datasets:[{
+        label:'SL (kg)',
+        data:tankVals,
+        backgroundColor:tankVals.map(function(v,i){
+          return v===0?'#e2e5ea':'rgba(14,116,144,'+Math.max(1-i*0.04,0.35)+')';
+        }),
+        borderRadius:4
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      onClick:function(e,els){
+        if(!els.length) return;
+        var t=ALL_TANKS[els[0].index];
+        if(!TNK_DAY[t]) return;
+        slSelTank=slSelTank===t?null:t;
+        slSelDay=null;
+        slUpdateAll();
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:BG,borderColor:GRID,borderWidth:1,bodyColor:T2,padding:10,
+          callbacks:{
+            label:function(ctx){
+              return ctx.raw===0?' ยังไม่มีข้อมูล':' '+fmt(ctx.raw)+' kg ('+(ctx.raw/SL_TOTAL*100).toFixed(1)+'%)';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{grid:{color:GRID,lineWidth:0.5},min:0,
+          ticks:{color:T2,font:{size:10},callback:function(v){return v===0?'0':(v/1000).toFixed(0)+'k';}}},
+        y:{grid:{display:false},ticks:{color:T2,font:{size:11,family:'IBM Plex Sans Thai,sans-serif'}}}
+      }
+    }
+  });
+
+  slUpdateAll();
+}
+function slUpdateAll(){
+  var fb=document.getElementById('slFilterBar');
+  var ftags=document.getElementById('slFilterTags');
+  ftags.innerHTML='';
+  if(slSelDay) ftags.innerHTML+='<div class="f-tag"><i class="ti ti-calendar" aria-hidden="true"></i>วันที่ '+slSelDay+' พ.ค.<i class="ti ti-x" onclick="slSelDay=null;slUpdateAll();" aria-hidden="true"></i></div>';
+  if(slSelTank) ftags.innerHTML+='<div class="f-tag"><i class="ti ti-building" aria-hidden="true"></i>ถัง '+slSelTank+'<i class="ti ti-x" onclick="slSelTank=null;slUpdateAll();" aria-hidden="true"></i></div>';
+  fb.classList.toggle('show',!!(slSelDay||slSelTank));
+
+  var filtDays=[].concat(SL_DAYS);
+  if(slSelTank&&TNK_DAY[slSelTank]) filtDays=Object.keys(TNK_DAY[slSelTank]).map(Number);
+  if(slSelDay) filtDays=[slSelDay];
+
+  // Bar highlight
+  slBar.data.datasets[0].backgroundColor=SL_DAYS.map(function(d){return filtDays.indexOf(d)>=0?'#2563eb':'rgba(37,99,235,0.2)';});
+  slBar.data.datasets[1].backgroundColor=SL_DAYS.map(function(d,i){return filtDays.indexOf(d)>=0&&SL32[i]>0?'#ea580c':'rgba(234,88,12,0.15)';});
+  slBar.update('none');
+
+  // Tank chart
+  var baseVals=ALL_TANKS.map(function(t){return Object.values(TNK_DAY[t]||{}).reduce(function(a,b){return a+b;},0);});
+  if(slSelDay){
+    slTank.data.datasets[0].data=ALL_TANKS.map(function(t){return (DLY_TANK[slSelDay]||{})[t]||0;});
+    slTank.data.datasets[0].backgroundColor=ALL_TANKS.map(function(t){return (DLY_TANK[slSelDay]||{})[t]>0?'#0e7490':'#e2e5ea';});
+  } else {
+    slTank.data.datasets[0].data=baseVals;
+    slTank.data.datasets[0].backgroundColor=ALL_TANKS.map(function(t,i){
+      var base=baseVals[i]===0?'#e2e5ea':'rgba(14,116,144,'+Math.max(1-i*0.04,0.35)+')';
+      if(!slSelTank) return base;
+      return t===slSelTank?'#0e7490':'rgba(14,116,144,0.18)';
+    });
+  }
+  slTank.update('none');
+
+  // Cullet + SL totals per filtered days
+  var filtSL25=filtDays.reduce(function(s,d){var i=SL_DAYS.indexOf(d);return s+(i>=0?SL25[i]:0);},0);
+  var filtSL32=filtDays.reduce(function(s,d){var i=SL_DAYS.indexOf(d);return s+(i>=0?SL32[i]:0);},0);
+  var filtTot=filtSL25+filtSL32;
+  var filtBatch=filtDays.reduce(function(s,d){var i=SL_DAYS.indexOf(d);return s+(i>=0?SL_BATCH[i]:0);},0);
+
+  // Cullet used per filtered days (from DLY_TYPE -> classify to CL)
+  // Using ratio from monthly data: CL-2.5=980816, CL-3.2=172202 per 2655535 SL
+  var cl25Ratio=980816/2655535, cl32Ratio=172202/2655535;
+  var filtCL25=Math.round(filtTot*cl25Ratio);
+  var filtCL32=Math.round(filtTot*cl32Ratio);
+  var filtCLTot=filtCL25+filtCL32;
+
+  // Donut
+  var typeAgg={};
+  if(slSelDay) typeAgg=DLY_TYPE[slSelDay]||{};
+  else if(slSelTank) typeAgg=TNK_TYPE[slSelTank]||{};
+  else SL_DAYS.forEach(function(d){Object.entries(DLY_TYPE[d]||{}).forEach(function(kv){typeAgg[kv[0]]=(typeAgg[kv[0]]||0)+kv[1];});});
+  var g25=0,g32=0; var subMap={};
+  Object.entries(typeAgg).forEach(function(kv){
+    var t=kv[0],v=kv[1];
+    if(classifySL(t)==='SL-2.5') g25+=v; else g32+=v;
+    subMap[t]=(subMap[t]||0)+v;
+  });
+  slDonut.data.datasets[0].data=[g25,g32];
+  slDonut.update('none');
+
+  // Donut legend
+  var tl=document.getElementById('slTypeLegend'); tl.innerHTML='';
+  var tTot=g25+g32;
+  [['SL-2.5','#2563eb',['2.4A','240','2.2A']],['SL-3.2','#ea580c',['3.4I','3.4A','3.4M']]].forEach(function(grpInfo){
+    var grp=grpInfo[0],col=grpInfo[1],subs=grpInfo[2];
+    var gv=grp==='SL-2.5'?g25:g32;
+    var gp=tTot>0?(gv/tTot*100).toFixed(1):'0.0';
+    tl.innerHTML+='<div class="leg-grp-hdr"><div style="display:flex;align-items:center;gap:5px;"><div style="width:9px;height:9px;border-radius:2px;background:'+col+';"></div><span style="color:#1a1d23;">'+grp+'</span></div><span>'+fmtK(gv)+' kg <span style="color:#9ba3b2;">('+gp+'%)</span></span></div>';
+    subs.forEach(function(s){
+      if(!subMap[s]) return;
+      var sv=subMap[s];
+      var sp=tTot>0?(sv/tTot*100).toFixed(1):'0';
+      tl.innerHTML+='<div class="leg-sub"><div style="display:flex;align-items:center;gap:4px;"><div style="width:7px;height:7px;border-radius:1px;background:'+(TYPE_COLS[s]||col)+';"></div><span style="color:#5a6275;">'+s+'</span></div><span style="color:#9ba3b2;">'+fmtK(sv)+' ('+sp+'%)</span></div>';
+    });
+  });
+
+  // KPI updates
+  var isF=!!(slSelDay||slSelTank);
+  document.getElementById('slKpiSlVal').innerHTML=fmtK(filtTot)+' <span class="ku">kg</span>';
+  document.getElementById('slKpiSlSub').textContent='SL-2.5: '+fmtK(filtSL25)+' | SL-3.2: '+fmtK(filtSL32);
+  document.getElementById('slKpiSlPct').textContent=filtTot>0?(filtSL25/filtTot*100).toFixed(1)+'% / '+(filtSL32/filtTot*100).toFixed(1)+'%':'—';
+  document.getElementById('slKpiBatchVal').innerHTML=filtBatch+' <span class="ku">batch</span>';
+  document.getElementById('slKpiBatchAvg').textContent=filtDays.length>0?(filtBatch/filtDays.length).toFixed(1)+' batch/วัน':'—';
+  document.getElementById('slKpiBadge').textContent=isF?filtDays.length+' วัน':'14 วัน';
+  document.getElementById('slKpiBatchBadge').textContent=isF?filtDays.length+' วัน':'รวม';
+
+  // KPI Cullet — อัปเดตตาม filter
+  document.getElementById('slKpiClVal').innerHTML=fmtK(filtCLTot)+' <span class="ku">kg</span>';
+  document.getElementById('slKpiClSub').textContent='CL-3.2: '+fmtK(filtCL32);
+  var el=document.getElementById('kpiCL');
+  if(el) el.querySelector('.kp').textContent='CL-2.5: '+fmtK(filtCL25);
+
+  // KPI Tank — อัปเดตตาม filter
+  var topTank='—', topVal=0;
+  var tankValsFiltered={};
+  if(slSelDay){
+    tankValsFiltered=DLY_TANK[slSelDay]||{};
+  } else if(slSelTank){
+    tankValsFiltered={};
+    tankValsFiltered[slSelTank]=Object.values(TNK_DAY[slSelTank]||{}).reduce(function(a,b){return a+b;},0);
+  } else {
+    ALL_TANKS.forEach(function(t){
+      var v=Object.values(TNK_DAY[t]||{}).reduce(function(a,b){return a+b;},0);
+      if(v>0) tankValsFiltered[t]=v;
+    });
+  }
+  var tankEntries=Object.entries(tankValsFiltered).sort(function(a,b){return b[1]-a[1];});
+  if(tankEntries.length>0){
+    topTank=tankEntries[0][0];
+    topVal=tankEntries[0][1];
+  }
+  var activeTanks=tankEntries.filter(function(e){return e[1]>0;}).length;
+  document.getElementById('slKpiTankTop').innerHTML=topTank+' <span class="ku">มากสุด</span>';
+  document.getElementById('slKpiTankSub').textContent=topTank+': '+fmtK(topVal)+' kg';
+  document.getElementById('slKpiTankPct').textContent=filtTot>0?(topVal/filtTot*100).toFixed(1)+'%':'—';
+  document.getElementById('slKpiTankBadge').textContent=isF?activeTanks+' ถัง':'11 ถัง';
+
+  // Label updates
+  var lbl='ทั้งเดือน พ.ค. (14 วัน)';
+  if(slSelDay) lbl='วันที่ '+slSelDay+' พ.ค.';
+  else if(slSelTank) lbl='ถัง '+slSelTank+' ('+filtDays.length+' วัน)';
+  document.getElementById('slKpiLabel').textContent=lbl;
+  document.getElementById('slChartLabel').textContent=isF?'กรองตาม: '+lbl:'คลิกแท่งวันหรือถังเพื่อ filter ทุก section';
+  document.getElementById('slDonutTitle').textContent='Type SL — '+lbl;
+
+  // Zone C table title
+  var tblTitle=document.getElementById('slTableTitle');
+  if(tblTitle) tblTitle.textContent=isF?'ตารางสรุป — '+lbl:'ตารางสรุปทั้งเดือน';
+}
+function slReset(){slSelDay=null;slSelTank=null;slUpdateAll();}
+
+// Init on load
+window.addEventListener('load', function(){ nav('production'); initCharts(); });
+
+// ═══════════════════════════════════════
+//  CONFIG PAGE
+// ═══════════════════════════════════════
+function switchCfgTab(tab) {
+  var tabs = ['furnace','cost-cl','cost-sl'];
+  tabs.forEach(function(t) {
+    var el = document.getElementById('cfg-'+t);
+    if(el) el.style.display = t===tab ? '' : 'none';
+    var btn = document.getElementById('cfg-tab-'+t);
+    if(btn) {
+      btn.className = 'ptab' + (t===tab ? ' active-cl' : '');
+    }
+  });
+}
+
+function calcCapPerShift(fn) {
+  var cap = parseInt(document.getElementById('f'+fn+'-cap').value) || 0;
+  var status = document.getElementById('f'+fn+'-status').value;
+  var perShift = status === 'active' ? Math.round(cap/3).toLocaleString() : '—';
+  document.getElementById('f'+fn+'-shift').textContent = status === 'active' ? perShift+' kg' : 'ไม่ผลิต';
+  updateCapSummary();
+}
+
+function updateFurnaceCard(fn) {
+  var status = document.getElementById('f'+fn+'-status').value;
+  var card = document.getElementById('fcard-'+fn);
+  var capInput = document.getElementById('f'+fn+'-cap');
+  var vnInput = document.getElementById('f'+fn+'-vn');
+  var codeInput = document.getElementById('f'+fn+'-code');
+  var shiftEl = document.getElementById('f'+fn+'-shift');
+
+  if(status === 'active') {
+    card.style.opacity = '1';
+    capInput.disabled = false;
+    vnInput.disabled = false;
+    codeInput.disabled = false;
+    capInput.style.background = 'var(--surface2)';
+    capInput.style.color = 'var(--navy)';
+    vnInput.style.background = 'var(--surface2)';
+    vnInput.style.color = 'var(--text)';
+    codeInput.style.background = 'var(--surface2)';
+    codeInput.style.color = 'var(--orange)';
+    calcCapPerShift(fn);
+  } else {
+    card.style.opacity = '0.75';
+    capInput.disabled = true;
+    vnInput.disabled = true;
+    codeInput.disabled = true;
+    capInput.style.background = '#f0f0f0';
+    capInput.style.color = 'var(--text3)';
+    vnInput.style.background = '#f0f0f0';
+    vnInput.style.color = 'var(--text3)';
+    codeInput.style.background = '#f0f0f0';
+    codeInput.style.color = 'var(--text3)';
+    shiftEl.textContent = 'ไม่ผลิต';
+    // Show status label
+    var statusLabels = {pm:'🔧 PM',repair:'🔴 ซ่อม',upgrade:'🔨 ปรับปรุง'};
+    shiftEl.textContent = statusLabels[status] || 'หยุด';
+  }
+  updateCapSummary();
+}
+
+function updateCapSummary() {
+  var activeFurnaces = 0;
+  var totalCap = 0;
+  [1,2,3,4].forEach(function(fn) {
+    var status = document.getElementById('f'+fn+'-status').value;
+    if(status === 'active') {
+      activeFurnaces++;
+      totalCap += parseInt(document.getElementById('f'+fn+'-cap').value) || 0;
+    }
+  });
+  document.getElementById('sum-active-furnaces').textContent = activeFurnaces + ' เตา';
+  document.getElementById('sum-cap-day').textContent = totalCap.toLocaleString() + ' kg';
+  document.getElementById('sum-cap-month').textContent = '~' + Math.round(totalCap*30/1000).toLocaleString() + ' ตัน';
+}
+
+function saveFurnaceConfig() {
+  var effDate = document.getElementById('cfgEffDate').value;
+  if(!effDate) { alert('กรุณาเลือกวันที่มีผล'); return; }
+
+  var lines = ['F1','F2','F3','F4'];
+  var statuses = [1,2,3,4].map(function(fn){
+    return document.getElementById('f'+fn+'-status').value;
+  });
+  var caps = [1,2,3,4].map(function(fn){
+    return document.getElementById('f'+fn+'-status').value === 'active' ?
+      document.getElementById('f'+fn+'-cap').value : 'PM';
+  });
+
+  var d = new Date(effDate);
+  var dStr = d.getDate()+' '+'ม.ค.ก.พ.มี.ค.เม.ย.พ.ค.มิ.ย.ก.ค.ส.ค.ก.ย.ต.ค.พ.ย.ธ.ค.'.split('.')[d.getMonth()]+' '+(d.getFullYear()+543);
+
+  // Add to history table
+  var tbody = document.getElementById('cfgHistoryBody');
+  var newRow = '<tr style="background:var(--blue-l);">';
+  newRow += '<td style="padding:8px 12px;border-bottom:0.5px solid var(--border);"><span style="font-family:var(--mono);font-size:11.5px;">'+dStr+'</span><span style="font-size:10px;color:var(--text3);margin-left:6px;">'+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.</span></td>';
+  [0,1,2,3].forEach(function(i){
+    var v = caps[i];
+    var isActive = v !== 'PM' && v !== 'ซ่อม' && v !== 'ปรับปรุง';
+    var chipStyle = isActive ? 'background:var(--green-l);color:var(--green)' : 'background:var(--amber-l);color:var(--amber)';
+    newRow += '<td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:center;"><span style="'+chipStyle+';font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;">'+(isActive?parseInt(v).toLocaleString():v)+'</span></td>';
+  });
+  var totalCap = [0,1,2,3].reduce(function(s,i){return s+(caps[i]!=='PM'?parseInt(caps[i])||0:0);},0);
+  newRow += '<td style="padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:right;font-family:var(--mono);font-weight:500;">'+totalCap.toLocaleString()+' kg</td>';
+  newRow += '<td style="padding:8px 12px;border-bottom:0.5px solid var(--border);color:var(--text3);">WJ</td>';
+  newRow += '</tr>';
+  tbody.insertAdjacentHTML('afterbegin', newRow);
+
+  // Show success
+  var btn = event.target.closest('button');
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<i class="ti ti-check"></i> บันทึกแล้ว!';
+  btn.style.background = 'var(--green)';
+  setTimeout(function(){ btn.innerHTML=orig; btn.style.background='var(--navy)'; }, 2000);
+}
+
+function saveCostCL() {
+  var btn = event.target.closest('button');
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<i class="ti ti-check"></i> บันทึกแล้ว!';
+  btn.style.background = 'var(--green)';
+  updateCLCostCalc();
+  setTimeout(function(){ btn.innerHTML=orig; btn.style.background='var(--navy)'; }, 2000);
+}
+
+function saveCostSL() {
+  var btn = event.target.closest('button');
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<i class="ti ti-check"></i> บันทึกแล้ว!';
+  btn.style.background = 'var(--teal)';
+  setTimeout(function(){ btn.innerHTML=orig; btn.style.background='var(--teal)'; }, 2000);
+}
+
+function updateCLCostCalc() {
+  var ng = parseFloat(document.getElementById('cl-ng').value)||0;
+  var elec = parseFloat(document.getElementById('cl-elec').value)||0;
+  var sand = parseFloat(document.getElementById('cl-sand').value)||0;
+  var soda = parseFloat(document.getElementById('cl-soda').value)||0;
+  var VN = 165; // m³/ตัน average
+  var ELEC_PER_TON = 21; // kWh/ตัน average
+  var SAND_PER_TON = 790; // kg ต่อตัน cullet
+  var SODA_PER_TON = 450; // kg ต่อตัน cullet
+  var ngCost = Math.round(ng * VN);
+  var elecCost = Math.round(elec * ELEC_PER_TON);
+  var rmCost = Math.round(sand*SAND_PER_TON + soda*SODA_PER_TON);
+  var total = ngCost + elecCost + rmCost;
+  document.getElementById('cl-cost-ng').textContent = ngCost.toLocaleString();
+  document.getElementById('cl-cost-elec').textContent = elecCost.toLocaleString();
+  document.getElementById('cl-cost-rm').textContent = rmCost.toLocaleString();
+  document.getElementById('cl-cost-total').textContent = total.toLocaleString();
+}
+
+// Add input listeners for live cost calculation
+window.addEventListener('load', function(){
+  ['cl-ng','cl-elec','cl-sand','cl-soda'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('input', updateCLCostCalc);
+  });
+  updateCLCostCalc();
+  updateCapSummary();
+});
+
+// ═══════════════════════════════════════════════════
+//  SALES PAGE — DATA & LOGIC
+// ═══════════════════════════════════════════════════
+var S_MONTHS = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.'];
+var S_GRP_LABELS = {'CL':'CL Cullet','SL-2.x':'SL-2.x','SL-3.x':'SL-3.x'};
+var S_BG='#ffffff', S_GRID='#e2e5ea', S_T2='#5a6275';
+var S_C_SL2='#1a56db', S_C_SL3='#0d7a4a', S_C_CL='#ea580c';
+
+// ── LIVE DATA CONFIG ──
+var WORKER_URL = 'https://esl-sales-proxy.acesltscesltsc.workers.dev';
+
+// ── Runtime data (populated by fetch) ──
+var S_MONTHLY_GRP = [];
+var S_CUSTOMERS = [];
+var S_CONC_MONTHLY = {0:{pct:0,top2:[],total:0}};
+var S_PRODUCTS = [];
+var S_CL_FURNACE = {'F1':[],'F3':[],'F4':[]};
+var S_OVERDUE = [];
+var S_PROD_SHARE_ALL = [];
+var S_PROD_COLORS = {
+  'SL-2.4A':'#1a56db','CL3.4-G':'#ea580c','CL3.4-H':'#f97316',
+  'SL-3.4I':'#0d7a4a','LS8':'#6366f1','SL-2.4C':'#3b82f6',
+  'CL3.4-F':'#dc2626','SL-3.4A':'#16a34a','SL-2.2A':'#818cf8',
+  'SL-3.4L':'#0891b2','SL-3.4M':'#7c3aed','อื่นๆ':'#94a3b8'
+};
+var S_FRESHNESS = null;
+
+// ── Month names (dynamic จาก API) ──
+var S_AVAIL_MONTHS = []; // [{m:1,label:'ม.ค.'}, ...]
+var S_MONTHS_TH = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+function sClassifyGrp(code) {
+  var c = (code||'').toUpperCase();
+  if(c.indexOf('CL')===0) return 'CL';
+  if(c==='LS8') return 'SL-2.x';
+  var m=c.match(/[-](\d+)/);
+  if(m){ var mol=parseFloat(m[1]); return mol>=3?'SL-3.x':'SL-2.x'; }
+  return 'SL-2.x';
+}
+
+// ── Load data from Worker ──
+function sLoadData(year, callback) {
+  var url = WORKER_URL + '?action=sales&year=' + (year||2026);
+  var loadEl = document.getElementById('s-loadingBar');
+  if(loadEl) loadEl.style.display='flex';
+
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.error){ console.error('API error:', data.error); if(loadEl)loadEl.style.display='none'; return; }
+
+    var S_SUMMARY = {total_net_mb:0, total_qty_ton:0, invoice_count:0, customer_count:0};
+
+  // populate S_MONTHLY_GRP
+      S_MONTHLY_GRP = data.monthly_grp || [];
+
+      // store summary
+      S_SUMMARY = data.summary || S_SUMMARY;
+
+      // populate S_PRODUCTS — แปลง monthly object → array ตาม month number
+      S_PRODUCTS = (data.products||[]).map(function(p){
+        var grp = sClassifyGrp(p.code);
+        // monthly object key = "2026-MM", แปลงเป็น array index by month number
+        var mArr = [];
+        if(p.monthly){
+          Object.keys(p.monthly).forEach(function(k){
+            var mNum = parseInt(k.split('-')[1]);
+            mArr[mNum] = p.monthly[k];
+          });
+        }
+        return {
+          code:    p.code,
+          name:    p.code,
+          grp:     grp,
+          net_all: p.net_all,
+          qty_ton: p.qty_ton,
+          price:   p.price,
+          monthly_obj: p.monthly||{},
+          monthly: mArr
+        };
+      });
+
+      // S_PROD_SHARE_ALL จาก products ทั้งหมด
+      var totNet = (data.summary||{}).total_net_mb||1;
+      S_PROD_SHARE_ALL = S_PRODUCTS.slice(0,10).map(function(p){
+        return {code:p.code,grp:p.grp,net:p.net_all,pct:Math.round(p.net_all/totNet*100)};
+      });
+
+      // populate S_CUSTOMERS
+      S_CUSTOMERS = (data.customers||[]).map(function(c){
+        var mArr=[];
+        if(c.monthly){
+          Object.keys(c.monthly).forEach(function(k){
+            var mNum=parseInt(k.split('-')[1]);
+            mArr[mNum]=(mArr[mNum]||0)+c.monthly[k];
+          });
+        }
+        return {
+          cc:          c.cc,
+          name:        c.name,
+          net_all:     c.net_all,
+          qty_ton:     c.qty_ton||0,
+          grp_mix_all: c.grp_mix_all||{},
+          grp_mix_m:   {},
+          monthly:     mArr,
+          products:    []
+        };
+      });
+
+      // S_CONC_MONTHLY จาก concentration
+      var conc = data.concentration||{};
+      S_CONC_MONTHLY = {0: {
+        pct:   conc.pct||0,
+        top2:  conc.top2||[],
+        total: conc.total||totNet
+      }};
+
+      // S_CL_FURNACE — คำนวณจาก products CL
+      S_CL_FURNACE = {'F1':[],'F3':[],'F4':[]};
+      var clProds = S_PRODUCTS.filter(function(p){return p.grp==='CL';});
+      clProds.forEach(function(p){
+        var fn = p.code.indexOf('-F')>-1?'F1':p.code.indexOf('-G')>-1?'F3':p.code.indexOf('-H')>-1?'F4':null;
+        if(!fn) return;
+        // หาเดือนที่มีข้อมูล
+        var months=[1,2,3,4,5,6,7,8,9,10,11,12];
+        months.forEach(function(m){
+          var v=p.monthly[m]||0;
+          S_CL_FURNACE[fn].push({m:m,net:v});
+        });
+      });
+
+      // freshness
+      S_FRESHNESS = data.freshness;
+
+      // หาเดือนที่มีข้อมูล
+      var mSet={};
+      S_MONTHLY_GRP.forEach(function(r){ mSet[r.m]=true; });
+      S_AVAIL_MONTHS = Object.keys(mSet).map(function(m){ return parseInt(m); }).sort(function(a,b){return a-b;});
+
+      // อัปเดต filter strip buttons
+      sRebuildMonthFilter();
+      // อัปเดต freshness bar
+      sFreshnessUpdate();
+
+      if(loadEl) loadEl.style.display='none';
+      if(callback) callback();
+    })
+    .catch(function(err){
+      console.error('fetch error:', err);
+      if(loadEl) loadEl.style.display='none';
+    });
+}
+
+function sRebuildMonthFilter(){
+  var fs = document.getElementById('s-fs');
+  if(!fs) return;
+  var seg = fs.querySelector('.s-seg');
+  if(!seg) return;
+  var html = '<div class="mp active" onclick="sSetM(0)">ทั้งหมด</div>';
+  S_AVAIL_MONTHS.forEach(function(m){
+    html += '<div class="mp" onclick="sSetM('+m+')">'+S_MONTHS_TH[m]+'</div>';
+  });
+  seg.innerHTML = html;
+}
+
+function sFreshnessUpdate(){
+  var el = document.getElementById('s-freshness');
+  if(!el) return;
+  if(S_FRESHNESS){
+    el.style.display='flex';
+    el.querySelector('#s-fresh-date').textContent = 'ข้อมูลล่าสุด: '+S_FRESHNESS;
+  }
+}
+
+var sState = {month:0, grp:null, cust:null, prod:null};
+var sCharts = {};
+var sSalesInited = false;
+
+// Tooltip
+var sTtEl = null;
+function sGetTT(){if(!sTtEl)sTtEl=document.getElementById('s-tt');return sTtEl;}
+function sExtTT(ctx){
+  var el=sGetTT(),tip=ctx.tooltip;
+  if(tip.opacity===0){el.classList.remove('show');return;}
+  var rows='',tot=0;
+  tip.dataPoints.forEach(function(dp){
+    if(!dp.raw||dp.raw===0)return;
+    var col=dp.dataset.backgroundColor;
+    if(Array.isArray(col))col=col[dp.dataIndex];
+    rows+='<div class="tt-r"><div class="tt-d" style="background:'+col+'"></div><span>'+dp.dataset.label+'</span><span class="tt-v">'+dp.raw.toFixed(2)+'M</span></div>';
+    tot+=dp.raw;
+  });
+  if(!rows){el.classList.remove('show');return;}
+  el.innerHTML='<div class="tt-t">'+(tip.title?tip.title[0]:'')+'</div>'+rows+(tot>0?'<div class="tt-f">รวม: '+tot.toFixed(2)+' M฿</div>':'');
+  var r=ctx.chart.canvas.getBoundingClientRect();
+  var x=r.left+tip.caretX+14,y=r.top+tip.caretY-20;
+  el.style.display='block';
+  if(x+(el.offsetWidth||200)>window.innerWidth-10)x=r.left+tip.caretX-(el.offsetWidth||200)-14;
+  if(y<0)y=0;
+  el.style.left=x+'px';el.style.top=y+'px';
+  el.classList.add('show');
+}
+document.addEventListener('mouseleave',function(){var el=sGetTT();if(el)el.classList.remove('show');},true);
+
+function sFmtM(v){return (Math.round(v*100)/100).toFixed(2);}
+function sFmtN(v){return Math.round(v).toLocaleString('th-TH');}
+
+function sSetM(m){
+  sState.month=m;sState.cust=null;sState.prod=null;
+  document.querySelectorAll('#s-fs .mp').forEach(function(el,i){el.classList.toggle('active',i===m);});
+  document.getElementById('s-fs').classList.toggle('on',m>0||!!sState.grp);
+  document.getElementById('s-rstBtn').classList.toggle('hot',m>0||!!sState.grp);
+  sUpdAll();
+}
+function sTogGrp(g){
+  sState.grp=sState.grp===g?null:g;
+  document.querySelectorAll('#s-fs .gp').forEach(function(el){
+    var eg=el.classList.contains('gp-cl')?'CL':el.classList.contains('gp-sl2')?'SL-2.x':'SL-3.x';
+    el.classList.toggle('active',!sState.grp||eg===sState.grp);
+  });
+  document.getElementById('s-fs').classList.toggle('on',sState.month>0||!!sState.grp);
+  document.getElementById('s-rstBtn').classList.toggle('hot',sState.month>0||!!sState.grp);
+  sUpdAll();
+}
+function sSetCust(cc){sState.cust=sState.cust===cc?null:cc;sState.prod=null;sUpdAll();}
+function sSetProd(code){
+  if(code==='_null_')code=null;
+  sState.prod=sState.prod===code?null:code;
+  if(sState.prod){var p=S_PRODUCTS.find(function(x){return x.code===sState.prod;});if(p){sState.grp=p.grp;document.querySelectorAll('#s-fs .gp').forEach(function(el){var eg=el.classList.contains('gp-cl')?'CL':el.classList.contains('gp-sl2')?'SL-2.x':'SL-3.x';el.classList.toggle('active',eg===sState.grp);});}}
+  sUpdAll();
+}
+function sResetAll(){
+  sState={month:0,grp:null,cust:null,prod:null};
+  document.querySelectorAll('#s-fs .mp').forEach(function(el,i){el.classList.toggle('active',i===0);});
+  document.querySelectorAll('#s-fs .gp').forEach(function(el){el.classList.add('active');});
+  document.getElementById('s-fs').classList.remove('on');
+  document.getElementById('s-rstBtn').classList.remove('hot');
+  sUpdAll();
+}
+
+function sUpdKPI(){
+  var m=sState.month,g=sState.grp;
+  var mFilter=m?[m]:[1,2,3,4,5,6,7,8,9,10,11,12];
+  var net=0,prevNet=0,qty=0,inv=0;
+  S_MONTHLY_GRP.forEach(function(r){
+    if(mFilter.indexOf(r.m)<0)return;
+    if(g&&r.g!==g)return;
+    net+=r.net;
+    qty+=r.qty||0;
+  });
+  if(m>1){
+    S_MONTHLY_GRP.forEach(function(r){
+      if(r.m!==m-1)return;
+      if(g&&r.g!==g)return;
+      prevNet+=r.net;
+    });
+  }
+  // qty ton จาก products filter
+  var filtQty=0;
+  S_PRODUCTS.forEach(function(p){
+    if(g&&p.grp!==g)return;
+    if(m){filtQty+=(p.monthly[m]||0)/p.price*1000||0;}
+    else filtQty+=p.qty_ton||0;
+  });
+  // customers unique
+  var custSet={};
+  S_CUSTOMERS.forEach(function(c){
+    if(g&&!c.grp_mix_all[g])return;
+    var v=m?c.monthly[m]||0:c.net_all;
+    if(v>0)custSet[c.cc]=true;
+  });
+
+  document.getElementById('s-kv1').textContent=sFmtM(net);
+  document.getElementById('s-kv2').textContent=sFmtN(Math.round(filtQty));
+  document.getElementById('s-kv3').textContent=m?'—':(S_SUMMARY.invoice_count?sFmtN(S_SUMMARY.invoice_count):'—');
+  document.getElementById('s-kv4').textContent=m?(Object.keys(custSet).length||'—'):(S_SUMMARY.customer_count?S_SUMMARY.customer_count:Object.keys(custSet).length||'—');
+  var lbl=g?g+' · ':'';
+  var mlbl=m?'เดือน'+S_MONTHS_TH[m]:'ทั้งหมด';
+  document.getElementById('s-kpiLbl').textContent=lbl+mlbl+' 2569';
+  var lbls={};
+  S_AVAIL_MONTHS.forEach(function(mm){lbls[mm]='เดือน '+S_MONTHS_TH[mm];});
+  var subLbl=m?(lbls[m]||'เดือน '+m):'รวมทั้งหมด';
+  [1,2,3,4].forEach(function(i){
+    var el=document.getElementById('s-ks'+i);
+    if(el)el.textContent=subLbl;
+  });
+  if(m>1&&prevNet>0){
+    var chg=((net-prevNet)/prevNet*100).toFixed(1);
+    var up=parseFloat(chg)>=0;
+    var el=document.getElementById('s-kc1');
+    el.style.display='block';el.style.background=up?'#f0fdf4':'#fef2f2';el.style.color=up?'#15803d':'#b91c1c';
+    el.textContent=(up?'▲':'▼')+Math.abs(chg)+'%';
+  } else {document.getElementById('s-kc1').style.display='none';}
+}
+
+function sBuildMainChart(){
+  var ctx=document.getElementById('s-mainChart').getContext('2d');
+  var availM=S_AVAIL_MONTHS.length?S_AVAIL_MONTHS:[1,2,3,4,5];
+  var labels=availM.map(function(m){return S_MONTHS_TH[m];});
+  var grps=['SL-2.x','SL-3.x','CL'];
+  var cols={'SL-2.x':S_C_SL2,'SL-3.x':S_C_SL3,'CL':S_C_CL};
+  var datasets=grps.map(function(g){
+    return {label:S_GRP_LABELS[g],
+      data:availM.map(function(m){var r=S_MONTHLY_GRP.find(function(x){return x.m===m&&x.g===g;});return r?Math.round(r.net*100)/100:0;}),
+      backgroundColor:cols[g],stack:'s',borderRadius:2,borderSkipped:false};
+  });
+  if(sCharts.main){sCharts.main.destroy();}
+  sCharts.main=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:datasets},options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    onClick:function(e,els){
+      if(!els.length)return;
+      var m=availM[els[0].index];
+      if(!m)return;
+      sSetM(sState.month===m?0:m);
+    },
+    plugins:{legend:{display:false},tooltip:{enabled:false,external:sExtTT}},
+    scales:{
+      x:{stacked:true,grid:{color:S_GRID,lineWidth:0.5},ticks:{color:S_T2,font:{size:10},maxRotation:0}},
+      y:{stacked:true,grid:{color:S_GRID,lineWidth:0.5},min:0,
+        ticks:{color:S_T2,font:{size:9},callback:function(v){return v?v+'M':'0';}}}
+    }
+  }});
+}
+
+function sBuildTypeRevLine(){
+  var ctx=document.getElementById('s-typeRevLine').getContext('2d');
+  var availM=S_AVAIL_MONTHS.length?S_AVAIL_MONTHS:[1,2,3,4,5];
+  var mn=availM.map(function(m){return S_MONTHS_TH[m];});
+  var grps=[{label:'SL-2.x',col:S_C_SL2},{label:'SL-3.x',col:S_C_SL3},{label:'CL',col:S_C_CL}];
+  var datasets=grps.map(function(g){
+    return {label:g.label,
+      data:availM.map(function(m){
+        var r=S_MONTHLY_GRP.find(function(x){return x.m===m&&x.g===g.label;});
+        return r?Math.round(r.net*100)/100:0;
+      }),
+      borderColor:g.col,backgroundColor:g.col,
+      borderWidth:2,pointRadius:3,pointHoverRadius:5,
+      pointBorderColor:'#fff',pointBorderWidth:1.5,
+      tension:0.3,fill:false};
+  });
+  sCharts.typeRev=new Chart(ctx,{type:'line',data:{labels:mn,datasets:datasets},options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{enabled:false,external:sExtTT}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:S_T2,font:{size:8},maxRotation:0}},
+      y:{grid:{color:S_GRID,lineWidth:0.5},min:0,
+        ticks:{color:S_T2,font:{size:8},callback:function(v){return v?v+'M':'0';}}}}
+  }});
+}
+
+function sBuildProdShareDonut(){
+  var ctx=document.getElementById('s-prodShareBar').getContext('2d');
+  var items=S_PROD_SHARE_ALL.slice(0,6);
+  sCharts.prodShare=new Chart(ctx,{type:'bar',
+    data:{labels:items.map(function(x){return x.code;}),
+      datasets:[{data:items.map(function(x){return x.pct;}),
+        backgroundColor:items.map(function(x){return S_PROD_COLORS[x.code]||'#94a3b8';}),
+        borderRadius:3,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{enabled:false,external:sExtTT}},
+      scales:{x:{grid:{display:false},ticks:{color:S_T2,font:{size:8},callback:function(v){return v+'%';}}},
+        y:{grid:{display:false},ticks:{color:S_T2,font:{size:8}}}}}});
+}
+
+function sBuildConcDonut(){
+  var ctx=document.getElementById('s-concDonut').getContext('2d');
+  var d=S_CONC_MONTHLY[0];
+  var rest=Math.max(0,d.total-d.top2.reduce(function(s,x){return s+x.net;},0));
+  sCharts.concDonut=new Chart(ctx,{type:'doughnut',
+    data:{labels:d.top2.map(function(x){return x.name;}).concat(['อื่นๆ']),
+      datasets:[{data:d.top2.map(function(x){return x.net;}).concat([rest]),
+        backgroundColor:['#1a56db','#ea580c','#e4e7ed'],borderColor:'#fff',borderWidth:1.5}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+  sUpdConcDonut(0);
+}
+
+function sUpdConcDonut(m){
+  if(!sCharts.concDonut)return;
+  var d=S_CONC_MONTHLY[m]||S_CONC_MONTHLY[0];
+  var rest=Math.max(0,d.total-d.top2.reduce(function(s,x){return s+x.net;},0));
+  var vals=d.top2.map(function(x){return x.net;}).concat([rest]);
+  var cols=['#1a56db','#ea580c','#e4e7ed'];
+  sCharts.concDonut.data.datasets[0].data=vals;
+  sCharts.concDonut.update('none');
+  document.getElementById('s-concPct').textContent=d.pct+'%';
+  document.getElementById('s-riskNeedle').style.left=Math.min(d.pct,98)+'%';
+  var html='';
+  d.top2.forEach(function(x,i){
+    html+='<div style="color:'+cols[i]+';font-size:9px;">● '+x.name+': '+x.net.toFixed(1)+'M฿ ('+x.pct+'%)</div>';
+  });
+  html+='<div style="color:#94a3b8;font-size:9px;">● อื่นๆ: '+rest.toFixed(1)+'M฿</div>';
+  document.getElementById('s-concNames').innerHTML=html;
+}
+
+function sUpdCustMix(){
+  var ctx=document.getElementById('s-custMixDonut').getContext('2d');
+  var m=sState.month,custF=sState.cust;
+  var grpData={};
+  if(!custF){
+    var mFilter=m?[m]:[1,2,3,4,5];
+    var sl2=0,sl3=0,cl=0;
+    S_MONTHLY_GRP.forEach(function(r){
+      if(mFilter.indexOf(r.m)<0)return;
+      if(r.g==='SL-2.x')sl2+=r.net;
+      else if(r.g==='SL-3.x')sl3+=r.net;
+      else cl+=r.net;
+    });
+    grpData={'SL-2.x':Math.round(sl2*100)/100,'SL-3.x':Math.round(sl3*100)/100,'CL':Math.round(cl*100)/100};
+    document.getElementById('s-mixSub').textContent=m?'เดือน'+S_MONTHS_TH[m]:'ภาพรวมทั้งหมด';
+  } else {
+    var c=S_CUSTOMERS.find(function(x){return x.cc===custF;});
+    if(!c)return;
+    grpData=m&&c.grp_mix_m&&c.grp_mix_m[m]?c.grp_mix_m[m]:c.grp_mix_all;
+    document.getElementById('s-mixSub').textContent=c.name.substring(0,14)+'...';
+  }
+  var labels=Object.keys(grpData).filter(function(k){return grpData[k]>0;});
+  var colMap={'CL':S_C_CL,'SL-2.x':S_C_SL2,'SL-3.x':S_C_SL3};
+  if(sCharts.custMix){sCharts.custMix.destroy();}
+  sCharts.custMix=new Chart(ctx,{type:'doughnut',
+    data:{labels:labels,datasets:[{data:labels.map(function(g){return grpData[g];}),
+      backgroundColor:labels.map(function(g){return colMap[g]||'#94a3b8';}),borderColor:'#fff',borderWidth:1.5}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{display:false},tooltip:{enabled:false,external:sExtTT}}}});
+  var tot=labels.reduce(function(s,g){return s+(grpData[g]||0);},0)||1;
+  var leg='';
+  labels.forEach(function(g){
+    var v=grpData[g]||0;
+    leg+='<div style="display:flex;align-items:center;gap:4px;">'
+      +'<div style="width:8px;height:8px;border-radius:2px;background:'+(colMap[g]||'#94a3b8')+';flex-shrink:0;"></div>'
+      +'<span style="color:var(--text2);flex:1;">'+g+'</span>'
+      +'<span style="font-family:var(--mono,monospace);font-weight:500;">'+Math.round(v/tot*100)+'%</span>'
+      +'</div>';
+  });
+  var legEl=document.getElementById('s-mixLegend');
+  if(legEl)legEl.innerHTML=leg;
+}
+
+function sUpdCustList(){
+  var m=sState.month,grpF=sState.grp,custF=sState.cust;
+  var custs=S_CUSTOMERS.slice();
+  if(grpF)custs=custs.filter(function(c){return c.grp_mix_all[grpF]>0;});
+  custs.sort(function(a,b){var av=m?a.monthly[m]||0:a.net_all;var bv=m?b.monthly[m]||0:b.net_all;return bv-av;});
+  var tot=custs.reduce(function(s,c){return s+(m?c.monthly[m]||0:c.net_all);},0)||1;
+  var maxV=custs.length?(m?custs[0].monthly[m]||0.01:custs[0].net_all)||0.01:0.01;
+  var html='';
+  custs.slice(0,8).forEach(function(c){
+    var val=m?c.monthly[m]||0:c.net_all;
+    if(val<=0&&m) return;
+    var bw=Math.round(val/maxV*100);
+    var act=custF===c.cc;
+    var domGrp=Object.keys(c.grp_mix_all).sort(function(a,b){return c.grp_mix_all[b]-c.grp_mix_all[a];})[0];
+    var keys=Object.keys(c.grp_mix_all);
+    var tl=keys.length>1?'Mixed':domGrp;
+    var tc=keys.length>1?'tag-mix':({'CL':'tag-cl','SL-2.x':'tag-sl2','SL-3.x':'tag-sl3'}[domGrp]||'');
+    var bc={'CL':S_C_CL,'SL-2.x':S_C_SL2,'SL-3.x':S_C_SL3}[domGrp]||'#94a3b8';
+    var p=Math.round(val/tot*100);
+    html+='<div class="s-cust-row'+(act?' active':'')+'" onclick="sSetCust('+(act?0:'"'+c.cc+'"')+')">';
+    html+='<div class="s-cust-top"><span class="s-cust-name">'+c.name+'<span class="ctag '+tc+'">'+tl+'</span></span>';
+    html+='<span class="s-cust-val">'+sFmtM(val)+'M <span class="s-cpct">('+p+'%)</span></span></div>';
+    html+='<div class="s-cust-bar"><div class="s-cust-barf" style="width:'+bw+'%;background:'+bc+'"></div></div>';
+    html+='</div>';
+  });
+  document.getElementById('s-custList').innerHTML=html||'<div style="font-size:11px;color:var(--text3);padding:8px;">ไม่มีข้อมูล</div>';
+  document.getElementById('s-custSubLbl').textContent=grpF?'กรอง: '+grpF:m?S_MONTHS_TH[m]+' · คลิกเพื่อ filter':'คลิกชื่อลูกค้าเพื่อ filter';
+}
+
+function sGrpChip(g){var m2={'CL':'chip-cl','SL-2.x':'chip-sl2','SL-3.x':'chip-sl3'};return '<span class="grp-chip '+(m2[g]||'')+'">'+ g+'</span>';}
+function sUpdProds(){
+  var grpF=sState.grp,prodF=sState.prod,custF=sState.cust,m=sState.month;
+  var prods=S_PRODUCTS.slice();
+  if(grpF)prods=prods.filter(function(p){return p.grp===grpF;});
+  prods.sort(function(a,b){
+    var av=m?(a.monthly[m]||0):a.net_all;
+    var bv=m?(b.monthly[m]||0):b.net_all;
+    return bv-av;
+  });
+  if(m)prods=prods.filter(function(p){return (p.monthly[m]||0)>0;});
+  var html='';
+  prods.forEach(function(p){
+    var act=prodF===p.code;
+    var nv=m?(p.monthly[m]||0):p.net_all;
+    var qv=p.price>0?Math.round(nv/p.price*1000):Math.round(p.qty_ton||0);
+    var pv=p.price||0;
+    var oc="sSetProd('"+(act?'_null_':p.code)+"')";
+    html+='<tr class="'+(act?'active':'')+'" onclick="'+oc+'">';
+    html+='<td style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;">'+p.code+'</td>';
+    html+='<td>'+p.name+'</td>';
+    html+='<td>'+sGrpChip(p.grp)+'</td>';
+    html+='<td class="r" style="font-family:\'IBM Plex Mono\',monospace;">'+sFmtM(nv)+'</td>';
+    html+='<td class="r" style="font-family:\'IBM Plex Mono\',monospace;">'+sFmtN(qv)+'</td>';
+    html+='<td class="r"><span style="font-family:\'IBM Plex Mono\',monospace;font-weight:600;color:'+(p.grp==='CL'?'#ea580c':'var(--text)')+'">'+pv.toFixed(2)+'</span></td>';
+    html+='</tr>';
+  });
+  document.getElementById('s-prodBody').innerHTML=html||'<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">ไม่มีข้อมูล</td></tr>';
+  var lbl=grpF?'กลุ่ม: '+grpF:custF?'กรองตามลูกค้า':'';
+  if(m)lbl=(lbl?lbl+' · ':'')+S_MONTHS_TH[m];
+  else lbl=lbl||'ทั้งหมด';
+  document.getElementById('s-zoneCLbl').textContent=lbl;
+}
+
+function sUpdFurnCards(){
+  var m=sState.month;
+  var fd=[{n:'Furnace 1',code:'CL3.4-F',fn:'F1',col:'#f59e0b'},{n:'Furnace 3',code:'CL3.4-G',fn:'F3',col:'#ea580c'},{n:'Furnace 4',code:'CL3.4-H',fn:'F4',col:'#16a34a'}];
+  var tots=fd.map(function(f){
+    var a=S_CL_FURNACE[f.fn]||[];
+    if(m) return a.reduce(function(s,r){return s+(r.m===m?r.net:0);},0);
+    return a.reduce(function(s,r){return s+r.net;},0);
+  });
+  var mx=Math.max.apply(null,tots)||1;
+  var html='';
+  fd.forEach(function(f,i){
+    var v=tots[i];
+    html+='<div class="furn-c"><div class="furn-hd"><span style="font-size:11px;font-weight:600;"><span style="color:'+f.col+';">●</span> '+f.n+'</span><span style="font-size:9.5px;background:var(--bg);padding:1px 6px;border-radius:10px;color:var(--text3);">'+f.code+'</span></div>';
+    html+='<div class="furn-val" style="color:'+f.col+'">฿'+sFmtM(v)+'M</div>';
+    html+='<div class="furn-bar"><div class="furn-barf" style="background:'+f.col+';width:'+Math.round(v/mx*100)+'%;"></div></div></div>';
+  });
+  document.getElementById('s-furnCards').innerHTML=html;
+}
+
+function sBuildFurnBar(){
+  var ctx=document.getElementById('s-furnBar').getContext('2d');
+  var fn=['F1','F3','F4'],fc=['#f59e0b','#ea580c','#16a34a'];
+  var availM=S_AVAIL_MONTHS.length?S_AVAIL_MONTHS:[1,2,3,4,5];
+  var labels=availM.map(function(m){return 'M.'+m;});
+  if(sCharts.furnBar){sCharts.furnBar.destroy();}
+  sCharts.furnBar=new Chart(ctx,{type:'bar',
+    data:{labels:labels,datasets:fn.map(function(f,i){
+      return {label:'เตา '+f,
+        data:availM.map(function(m){
+          var a=S_CL_FURNACE[f]||[];
+          var r=a.find(function(x){return x.m===m;});
+          return r?r.net:0;
+        }),
+        backgroundColor:fc[i],stack:'f',borderRadius:2};
+    })},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{enabled:false,external:sExtTT}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{color:S_T2,font:{size:9}}},
+        y:{stacked:true,grid:{color:S_GRID,lineWidth:0.5},ticks:{color:S_T2,font:{size:9},callback:function(v){return v?v+'M':'';}}}}}});
+}
+
+function sBuildOD(){
+  var html='';
+  S_OVERDUE.forEach(function(r){
+    html+='<tr><td>'+r.name+'</td><td><span class="od-badge '+(r.cat==='overdue'?'od-o':'od-7')+'">'+(r.cat==='overdue'?'เกินกำหนด':'ครบ 7 วัน')+'</span></td><td class="r">฿'+sFmtM(r.net)+'M</td><td class="r">'+r.inv+'</td></tr>';
+  });
+  document.getElementById('s-odBody').innerHTML=html;
+}
+
+function sUpdTypeRevLine(){
+  if(!sCharts.typeRev) return;
+  var m=sState.month;
+  var fullCols=[S_C_SL2, S_C_SL3, S_C_CL];
+  var dimCols=['rgba(26,86,219,0.2)','rgba(13,122,74,0.2)','rgba(234,88,12,0.2)'];
+  sCharts.typeRev.data.datasets.forEach(function(ds, i){
+    if(m>0){
+      // แสดงจุดเดือนที่เลือกสีเต็ม ที่เหลือ dim
+      var ptColors=[];
+      var ptRadius=[];
+      var availM=S_AVAIL_MONTHS.length?S_AVAIL_MONTHS:[1,2,3,4,5];
+      for(var j=0;j<availM.length;j++){
+        ptColors.push(availM[j]===m ? fullCols[i] : dimCols[i]);
+        ptRadius.push(availM[j]===m ? 5 : 2);
+      }
+      ds.borderColor=fullCols[i];
+      ds.pointBackgroundColor=ptColors;
+      ds.pointRadius=ptRadius;
+      ds.borderWidth=2;
+    } else {
+      ds.borderColor=fullCols[i];
+      ds.pointBackgroundColor=fullCols[i];
+      ds.pointRadius=3;
+      ds.borderWidth=2;
+    }
+  });
+  sCharts.typeRev.update('none');
+}
+
+function sUpdProdShare(){
+  var m=sState.month;
+  var items;
+  if(m){
+    // รวมจาก S_TYPE_REVENUE.monthly ตามเดือน
+    var mData=S_TYPE_REVENUE.monthly[m]||{};
+    var arr=[];
+    Object.keys(mData).forEach(function(code){
+      if(mData[code]>0) arr.push({code:code,net:mData[code]});
+    });
+    arr.sort(function(a,b){return b.net-a.net;});
+    var tot=arr.reduce(function(s,x){return s+x.net;},0)||1;
+    arr.forEach(function(x){x.pct=Math.round(x.net/tot*100);});
+    items=arr.slice(0,6);
+  } else {
+    items=S_PROD_SHARE_ALL.slice(0,6);
+  }
+  if(!sCharts.prodShare) return;
+  sCharts.prodShare.data.labels=items.map(function(x){return x.code;});
+  sCharts.prodShare.data.datasets[0].data=items.map(function(x){return x.pct;});
+  sCharts.prodShare.data.datasets[0].backgroundColor=items.map(function(x){return S_PROD_COLORS[x.code]||'#94a3b8';});
+  sCharts.prodShare.update('none');
+  document.getElementById('s-donutSub').textContent=m?'เดือน'+S_MONTHS_TH[m]:'ยอดขาย ฿ รวม';
+}
+
+function sUpdAll(){
+  sUpdKPI();
+  sUpdMainChart();
+  sUpdTypeRevLine();
+  sUpdProdShare();
+  sUpdConcDonut(sState.month);
+  sUpdCustMix();
+  sUpdCustList();
+  sUpdProds();
+  sUpdFurnCards();
+}
+
+function sUpdMainChart(){
+  if(!sCharts.main)return;
+  var m=sState.month,g=sState.grp;
+  var fullCols={'CL Cullet':S_C_CL,'SL-2.x':S_C_SL2,'SL-3.x':S_C_SL3};
+  var dimCols={'CL Cullet':'rgba(234,88,12,0.18)','SL-2.x':'rgba(26,86,219,0.18)','SL-3.x':'rgba(13,122,74,0.18)'};
+  var numBars=S_AVAIL_MONTHS.length||5; // จำนวนเดือนที่มีข้อมูลจริง
+  sCharts.main.data.datasets.forEach(function(ds){
+    var baseCol=fullCols[ds.label]||S_C_SL2;
+    var dimCol=dimCols[ds.label]||'rgba(148,163,184,0.18)';
+    // กรอง grp
+    var grpMatch=!g||(ds.label===S_GRP_LABELS[g])||(ds.label===g);
+    if(!grpMatch){
+      // dim ทั้ง dataset
+      var arr=[];
+      for(var i=0;i<numBars;i++) arr.push('rgba(148,163,184,0.12)');
+      ds.backgroundColor=arr;
+    } else if(m>0){
+      // เดือนที่เลือก = สีเต็ม, อื่น = dim
+      var arr2=[];
+      for(var j=0;j<numBars;j++) arr2.push(S_AVAIL_MONTHS[j]===m?baseCol:dimCol);
+      ds.backgroundColor=arr2;
+    } else {
+      // ไม่ได้เลือก = สีเต็มทุกเดือน
+      ds.backgroundColor=baseCol;
+    }
+  });
+  sCharts.main.update('none');
+  document.getElementById('s-mainSub').textContent=m?'เดือน'+S_MONTHS_TH[m]+' — คลิกซ้ำเพื่อยกเลิก':'คลิกแท่งเดือนเพื่อเลือก · คลิกซ้ำเพื่อยกเลิก';
+}
+
+function sInitCharts(){
+  // แสดง loading state
+  document.getElementById('s-kv1').textContent='...';
+  document.getElementById('s-kv2').textContent='...';
+  document.getElementById('s-kv3').textContent='...';
+  document.getElementById('s-kv4').textContent='...';
+
+  sLoadData(2026, function(){
+    sBuildMainChart();
+    sBuildTypeRevLine();
+    sBuildProdShareDonut();
+    sBuildConcDonut();
+    sBuildFurnBar();
+    sBuildOD();
+    sUpdAll();
+    sSalesInited=true;
+  });
+}
+
+</script>
+</body>
+</html>
